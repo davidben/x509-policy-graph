@@ -68,7 +68,7 @@ when, and only when, they appear in all capitals, as shown here.
 
 # X.509 policy trees
 
-The "valid_policy_tree", defined in {{Section 6.1.2 of !RFC5280}}, is a tree of
+The `valid_policy_tree`, defined in {{Section 6.1.2 of !RFC5280}}, is a tree of
 certificate policies. The nodes at any given depth in the tree correspond to
 policies asserted by a certificate in the certificate path. A node's
 parent policy is the policy in the issuer certificate which was mapped to this
@@ -80,7 +80,7 @@ For example, suppose a certificate chain contains:
 * An intermediate certificate which asserts policy object identifiers (OIDs)
   OID1, OID2, and OID5. It contains mappings OID1 to OID3, and OID1 to OID4.
 
-* An end-entity certificate which asserts policy OIDs OID2, OID3, and OID3.
+* An end-entity certificate which asserts policy OIDs OID2, OID3, and OID6.
 
 This would result in the tree shown in {{basic-tree}}.
 
@@ -170,6 +170,7 @@ produce multiple nodes, but each node is identical, with identical children.
 
 This document replaces the tree structure with a directed acyclic graph.
 Where {{!RFC5280}} adds multiple duplicate nodes, this document adds a single node with multiple parents.
+See {{updates}} for the procedure for building this structure.
 {{exponential-tree-as-graph}} shows the updated representation of the above example.
 
 ~~~ ascii-art
@@ -211,22 +212,21 @@ Where {{!RFC5280}} adds multiple duplicate nodes, this document adds a single no
 
 This graph's size is bounded linearly by the total number of certificate
 policies ({{Section 4.2.1.4 of RFC5280}}) and policy mappings ({{Section 4.2.1.5
-of RFC5280}}). It represents the same information as the policy tree. The policy
-tree is the tree of all possibles from the root to a leaf in the policy graph.
+of RFC5280}}). The policy tree from {{RFC5280}} is the tree of all paths from the root to a leaf in the policy graph,
+so no information is lost in the graph representation.
 
-Implementations of X.509 SHOULD implement a policy graph structure, as described
-in {{updates}}, instead of a policy tree.
+Implementations of X.509 SHOULD implement a policy graph structure instead of a policy tree.
 
 ## Verification outputs {#outputs}
 
-{{Section 6.1.6 of RFC5280}} describes the entire "valid_policy_tree" value as
+{{Section 6.1.6 of RFC5280}} describes the entire `valid_policy_tree` structure as
 an output of the verification process. Section 12.2 of {{X.509}} instead only
 outputs the authorities-constrained policies, the user-constrained policies,
 and their associated qualifiers.
 
 An implementation which outputs the entire tree may be unable switch the format
 to a more efficient one, as described in {{policy-graph}}. X.509 implementations
-SHOULD NOT output the entire "valid_policy_tree" structure and instead SHOULD
+SHOULD NOT output the entire `valid_policy_tree` structure and instead SHOULD
 limit output to just the set of authorities-constrained and/or user-constrained
 policies, as described in {{X.509}}. X.509 implementations are additionally
 RECOMMENDED to omit policy qualifiers from the output, as this simplifies the
@@ -237,9 +237,9 @@ the policyQualifiers field in PolicyInformation structures.
 
 ## Other mitigations
 
-X.509 implementations that are unable to build the policy tree SHOULD mitigate
-the denial-of-service attack in other ways. This section describes alternate
-mitigation and partial mitigation strategies.
+X.509 implementations that are unable switch to the policy graph structure
+SHOULD mitigate the denial-of-service attack in other ways. This section
+describes alternate mitigation and partial mitigation strategies.
 
 ### Limit certificate depth
 
@@ -265,7 +265,7 @@ certificate paths which rely on policy mapping.
 
 To faciliate this mitigation, certificate authorities SHOULD NOT issue
 certificates with the policy mappings extension ({{Section 4.2.1.5 of
-RFC5280}}). Applications maintaining policies for accepted trustanchors are
+RFC5280}}). Applications maintaining policies for accepted trust anchors are
 RECOMMENDED to forbid this extension in participating certificate authorities.
 
 ### Disable policy checking
