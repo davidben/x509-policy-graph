@@ -1,14 +1,16 @@
 ---
 title: Updates to X.509 Policy Validation
 abbrev: Updates to X.509 Policy Validation
-docname: draft-davidben-x509-policy-graph-latest
+docname: draft-ietf-lamps-x509-policy-graph-latest
 category: std
+submissionType: IETF
 
 updates: 5280
 
 ipr: trust200902
-area: General
+area: sec
 keyword: Internet-Draft
+workgroup: LAMPS
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs]
