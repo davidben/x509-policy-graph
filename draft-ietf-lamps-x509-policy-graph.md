@@ -8,9 +8,9 @@ submissionType: IETF
 updates: 5280
 
 ipr: trust200902
-area: sec
+area: "Security"
 keyword: Internet-Draft
-workgroup: LAMPS
+workgroup: "Limited Additional Mechanisms for PKIX and SMIME"
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs]
