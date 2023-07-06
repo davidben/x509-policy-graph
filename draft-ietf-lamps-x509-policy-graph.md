@@ -419,7 +419,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
          If `parent_nodes` is not empty, create a child node as follows:
          set the `valid_policy` to P-OID, set the `qualifier_set` to P-Q, set the `expected_policy_set` to {P-OID}, and set the parent nodes to `parent_nodes`.
 
-         For example, consider a `valid_policy_tree` with a node of depth i-1 where the `expected_policy_set` is {Gold, White},
+         For example, consider a `valid_policy_graph` with a node of depth i-1 where the `expected_policy_set` is {Gold, White},
          and a second node where the `expected_policy_set` is {Gold, Yellow}.
          Assume the certificate policies Gold and Silver appear in the certificate policies extension of certificate i.
          The Gold policy is matched, but the Silver policy is not.
@@ -579,7 +579,7 @@ This update replaces step (b) of {{Section 6.1.4 of RFC5280}} with the following
       subjectDomainPolicy values that are specified as
       equivalent to ID-P by the policy mappings extension.
 
-      If no node of depth i in the `valid_policy_tree` has a
+      If no node of depth i in the `valid_policy_graph` has a
       `valid_policy` of ID-P but there is a node of depth i with a
       `valid_policy` of anyPolicy, then generate a child node of
       the node of depth i-1 that has a `valid_policy` of anyPolicy
@@ -601,7 +601,7 @@ This update replaces step (b) of {{Section 6.1.4 of RFC5280}} with the following
       {: type="(%i)"}
       1. delete the node, if any, of depth i in the `valid_policy_graph` where ID-P is the `valid_policy`.
 
-      2. If there is a node in the `valid_policy_tree` of depth
+      2. If there is a node in the `valid_policy_graph` of depth
          i-1 or less without any child nodes, delete that
          node.  Repeat this step until there are no nodes of
          depth i-1 or less without children.
