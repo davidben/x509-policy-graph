@@ -265,7 +265,7 @@ significantly simplifies the X.509 implementation, which reduces the risk of
 other security bugs. However, this will break compatibility with any existing
 certificate paths which rely on policy mapping.
 
-To faciliate this mitigation, certificate authorities SHOULD NOT issue
+To facilitate this mitigation, certificate authorities SHOULD NOT issue
 certificates with the policy mappings extension ({{Section 4.2.1.5 of
 RFC5280}}). Applications maintaining policies for accepted trust anchors are
 RECOMMENDED to forbid this extension in participating certificate authorities.
