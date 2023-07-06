@@ -573,14 +573,15 @@ This update replaces step (b) of {{Section 6.1.4 of RFC5280}} with the following
 1. If a policy mappings extension is present, then for each issuerDomainPolicy ID-P in the policy mappings extension:
 
    {: type="(%d)"}
-   1. If the policy_mapping variable is greater than 0, if there is a
+   1. If the policy_mapping variable is greater than 0 and there is a
       node in the `valid_policy_graph` of depth i where ID-P is the
       valid_policy, set `expected_policy_set` to the set of
       subjectDomainPolicy values that are specified as
       equivalent to ID-P by the policy mappings extension.
 
-      If no node of depth i in the `valid_policy_graph` has a
-      `valid_policy` of ID-P but there is a node of depth i with a
+   2. If the policy_mapping variable is greater than 0,
+      no node of depth i in the `valid_policy_graph` has a
+      `valid_policy` of ID-P, but there is a node of depth i with a
       `valid_policy` of anyPolicy, then generate a child node of
       the node of depth i-1 that has a `valid_policy` of anyPolicy
       as follows:
@@ -596,7 +597,7 @@ This update replaces step (b) of {{Section 6.1.4 of RFC5280}} with the following
          subjectDomainPolicy values that are specified as
          equivalent to ID-P by the policy mappings extension.
 
-   2. If the `policy_mapping` variable is equal to 0:
+   3. If the `policy_mapping` variable is equal to 0:
 
       {: type="(%i)"}
       1. delete the node, if any, of depth i in the `valid_policy_graph` where ID-P is the `valid_policy`.
