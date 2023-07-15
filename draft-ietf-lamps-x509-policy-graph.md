@@ -163,6 +163,9 @@ For example, if there are two intermediate certificates and one end-entity certi
 ~~~
 {: #exponential-tree title="An Example X.509 Policy Tree with Exponential Growth"}
 
+Unmitigated, this growth allows a malicious validation input to consume
+resources exponential in the size of the input. An attacker could use this to
+mount a denial-of-service attack against X.509-based applications.
 
 ## Policy graph {#policy-graph}
 
@@ -173,7 +176,7 @@ produce multiple nodes, but each node is identical, with identical children.
 This document replaces the tree structure with a directed acyclic graph.
 Where {{!RFC5280}} adds multiple duplicate nodes, this document adds a single node with multiple parents.
 See {{updates}} for the procedure for building this structure.
-{{exponential-tree-as-graph}} shows the updated representation of the above example.
+{{exponential-tree-as-graph}} shows the updated representation of the example in {{exponential-tree}}.
 
 ~~~ ascii-art
               +-----------+
@@ -217,7 +220,9 @@ policies ({{Section 4.2.1.4 of RFC5280}}) and policy mappings ({{Section 4.2.1.5
 of RFC5280}}). The policy tree from {{RFC5280}} is the tree of all paths from the root to a leaf in the policy graph,
 so no information is lost in the graph representation.
 
-Implementations of X.509 SHOULD implement a policy graph structure instead of a policy tree.
+Implementations of X.509 SHOULD implement a policy graph structure instead of a
+policy tree. This mitigates the denial-of-service attack by removing the
+asymmetric cost in policy validation.
 
 ## Verification outputs {#outputs}
 
