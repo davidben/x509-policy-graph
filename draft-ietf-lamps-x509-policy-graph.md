@@ -82,12 +82,12 @@ when, and only when, they appear in all capitals, as shown here.
 
 The `valid_policy_tree`, defined in {{Section 6.1.2 of !RFC5280}}, is a tree of
 certificate policies. The nodes at any given depth in the tree correspond to
-policies asserted by a certificate in the certificate path. A node's
+policies asserted by a certificate in the certification path. A node's
 parent policy is the policy in the issuer certificate which was mapped to this
 policy, and a node's children are the policies it was mapped to in the subject
 certificate.
 
-For example, suppose a certificate chain contains:
+For example, suppose a certification path contains:
 
 * An intermediate certificate which asserts policy object identifiers (OIDs)
   OID1, OID2, and OID5. It contains mappings OID1 to OID3, and OID1 to OID4.
@@ -282,7 +282,7 @@ If policy mapping is disabled via the initial-policy-mapping-inhibit setting
 (see {{Section 6.1.1 of RFC5280}}), the attack is mitigated. This also
 significantly simplifies the X.509 implementation, which reduces the risk of
 other security bugs. However, this will break compatibility with any existing
-certificate paths which rely on policy mapping.
+certification paths which rely on policy mapping.
 
 To facilitate this mitigation, certificate authorities SHOULD NOT issue
 certificates with the policy mappings extension ({{Section 4.2.1.5 of
@@ -299,7 +299,7 @@ extensions as in {{Section 4.2 of RFC5280}} and be rejected.
 
 ## Verify Signatures First
 
-X.509 validators SHOULD verify signatures in certificate paths before or in
+X.509 validators SHOULD verify signatures in certification paths before or in
 conjunction with policy verification. This limits the attack to entities in
 control of CA certificates. For some applications, this may be sufficient to
 mitigate the attack. However, other applications may still be impacted. For
