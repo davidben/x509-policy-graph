@@ -68,7 +68,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{!RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# X.509 policy trees
+# X.509 Policy Trees
 
 The `valid_policy_tree`, defined in {{Section 6.1.2 of !RFC5280}}, is a tree of
 certificate policies. The nodes at any given depth in the tree correspond to
@@ -114,7 +114,7 @@ The complete algorithm for building this structure is described in steps (d),
 6.1.4 of !RFC5280}}, and steps (a), (b), and (g) of {{Section 6.1.5 of
 !RFC5280}}.
 
-## Exponential growth {#exponential-growth}
+## Exponential Growth {#exponential-growth}
 
 The algorithm described in {{RFC5280}} grows exponentially in the worst case. In
 step (d.1) of {{Section 6.1.3 of !RFC5280}}, a single policy P can produce
@@ -167,7 +167,7 @@ Unmitigated, this growth allows a malicious validation input to consume
 resources exponential in the size of the input. An attacker could use this to
 mount a denial-of-service attack against X.509-based applications.
 
-## Policy graph {#policy-graph}
+## Policy Graph {#policy-graph}
 
 {{!RFC5280}} describes a tree structure, but this is an unnecessarily
 inefficient representation of this information. A single certificate policy may
@@ -224,7 +224,7 @@ Implementations of X.509 SHOULD implement a policy graph structure instead of a
 policy tree. This mitigates the denial-of-service attack by removing the
 asymmetric cost in policy validation.
 
-## Verification outputs {#outputs}
+## Verification Outputs {#outputs}
 
 {{Section 6.1.6 of RFC5280}} describes the entire `valid_policy_tree` structure as
 an output of the verification process. Section 12.2 of {{X.509}} instead only
@@ -242,13 +242,13 @@ certificate authorities omit policy qualifiers from policy information terms.
 This document reiterates this and RECOMMENDS that certificate authorities omit
 the policyQualifiers field in PolicyInformation structures.
 
-## Other mitigations
+## Other Mitigations
 
 X.509 implementations that are unable switch to the policy graph structure
 SHOULD mitigate the denial-of-service attack in other ways. This section
 describes alternate mitigation and partial mitigation strategies.
 
-### Limit certificate depth
+### Limit Certificate Depth
 
 X.509 validators typically already allow limiting the depth of a certificate
 chain. This can limit the attack, however a large depth limit may still admit
@@ -256,13 +256,13 @@ attacks. By modifying the example in {{exponential-growth}} to increase the
 number of policies asserted in each certificate, an attacker could still achieve
 O(N^(depth/2)) scaling or higher.
 
-### Limit policy tree size
+### Limit Policy Tree Size
 
 If existing stable interfaces force the validator to build a full policy tree
 (see {{outputs}}), the validator SHOULD limit the number of nodes in the policy
 tree, and reject the certification path if this limit is reached.
 
-### Inhibit policy mapping
+### Inhibit Policy Mapping
 
 If policy mapping is disabled via the initial-policy-mapping-inhibit setting
 (see {{Section 6.1.1 of RFC5280}}), the attack is mitigated. This also
@@ -275,7 +275,7 @@ certificates with the policy mappings extension ({{Section 4.2.1.5 of
 RFC5280}}). Applications maintaining policies for accepted trust anchors are
 RECOMMENDED to forbid this extension in participating certificate authorities.
 
-### Disable policy checking
+### Disable Policy Checking
 
 An X.509 validator can mitigate this attack by disabling policy validation
 entirely. This may be viable for applications which do not require policy
@@ -283,7 +283,7 @@ validation. In this case, critical policy-related extensions, notably the policy
 constraints ({{Section 4.2.1.11 of RFC5280}}), MUST be treated as unrecognized
 extensions as in {{Section 4.2 of RFC5280}} and be rejected.
 
-### Verify signatures first
+### Verify Signatures First
 
 X.509 validators SHOULD verify signatures in certificate paths before or in
 conjunction with policy verification. This limits the attack to entities in
