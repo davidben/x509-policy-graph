@@ -34,6 +34,15 @@ informative:
     seriesinfo:
       ITU-T: Recommendation X.509
 
+  CVE-2023-0464:
+    title: Excessive Resource Usage Verifying X.509 Policy Constraints
+    target: https://www.cve.org/CVERecord?id=CVE-2023-0464
+    date: March 2023
+
+  CVE-2023-23524:
+    title: Processing a maliciously crafted certificate may lead to a denial-of-service
+    target: https://www.cve.org/CVERecord?id=CVE-2023-23524
+    date: February 2023
 
 --- abstract
 
@@ -51,8 +60,9 @@ along with a mechanism for mapping policies between subject and issuer policy
 domains in cross-certificates. This mechanism, when evaluated according to the
 algorithm in {{!RFC5280, Section 6.1}} produces a policy tree, describing
 policies asserted by each certificate, and mappings between them. This tree can
-grow exponentially in the depth of the certification path. This can lead to a
-denial-of-service attack in X.509-based applications.
+grow exponentially in the depth of the certification path. This cost asymmetry
+can lead to a denial-of-service attack in X.509-based applications, such as
+{{CVE-2023-0464}} and {{CVE-2023-23524}}.
 
 ## Summary of Changes from RFC 5280
 
@@ -163,9 +173,13 @@ For example, if there are two intermediate certificates and one end-entity certi
 ~~~
 {: #exponential-tree title="An Example X.509 Policy Tree with Exponential Growth"}
 
-Unmitigated, this growth allows a malicious validation input to consume
-resources exponential in the size of the input. An attacker could use this to
-mount a denial-of-service attack against X.509-based applications.
+An attacker can use this behavior to mount a denial-of-service attack against
+an X.509-based application. The attacker sends such a certificate chain and
+triggers the target application's certificate validation process. For example,
+the target application may be a TLS {{?RFC8446}} server that performs client
+certificate validation. The above exponential growth means the target
+application will consume far more resources processing the input than the
+attacker consumed to send it, preventing it from servicing other clients.
 
 ## Policy Graph {#policy-graph}
 
@@ -670,8 +684,15 @@ This update replaces {{Section 6.1.6 of RFC5280}} with the following text:
 
 # Security Considerations
 
-This document addresses a denial-of-service vulnerability in {{!RFC5280}}'s
-policy tree algorithm.
+{{exponential-growth}} discusses how {{!RFC5280}}'s policy tree algorithm leads
+to exponential growth. This flaw has led to denial-of-service vulnerabilities in
+real-world X.509-based applications, such as {{CVE-2023-0464}} and
+{{CVE-2023-23524}}.
+
+{{updates}} replaces this algorithm to avoid this issue. As discussed in
+{{policy-graph}}, the new structure scales linearly with the input. This means
+input limits in X.509 validators will more naturally bound processing time,
+thus avoiding these vulnerabilities.
 
 # IANA Considerations
 
