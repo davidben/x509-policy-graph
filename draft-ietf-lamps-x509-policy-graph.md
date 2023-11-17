@@ -61,8 +61,14 @@ domains in cross-certificates. This mechanism, when evaluated according to the
 algorithm in {{!RFC5280, Section 6.1}} produces a policy tree, describing
 policies asserted by each certificate, and mappings between them. This tree can
 grow exponentially in the depth of the certification path. This cost asymmetry
-can lead to a denial-of-service attack in X.509-based applications, such as
-{{CVE-2023-0464}} and {{CVE-2023-23524}}.
+can lead to a denial-of-service vulnerability in X.509-based applications, such
+as {{CVE-2023-0464}} and {{CVE-2023-23524}}.
+
+{{dos}} describes this vulnerability. {{policy-graph}} describes the primary
+mitigation for this vulnerability, a replacement for the policy tree structure.
+{{updates}} provides updates to {{!RFC5280}} which implement this change.
+Finally, {{other-mitigations}} discusses alternative mitigation strategies for
+X.509 applications.
 
 ## Summary of Changes from RFC 5280
 
@@ -78,10 +84,17 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{!RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# X.509 Policy Trees
+# Denial of Service Vulnerability {#dos}
 
-The `valid_policy_tree`, defined in {{Section 6.1.2 of !RFC5280}}, is a tree of
-certificate policies. The nodes at any given depth in the tree correspond to
+This section discusses how the path validation algorithm defined in
+{{Section 6.1.2 of !RFC5280}} can lead to a denial-of-service vulnerability in
+X.509-based applications.
+
+## Policy Trees
+
+{{Section 6.1.2 of !RFC5280}} constructs the `valid_policy_tree`, a tree of
+certificate policies, during certification path validation.
+The nodes at any given depth in the tree correspond to
 policies asserted by a certificate in the certification path. A node's
 parent policy is the policy in the issuer certificate which was mapped to this
 policy, and a node's children are the policies it was mapped to in the subject
@@ -126,7 +139,7 @@ The complete algorithm for building this structure is described in steps (d),
 
 ## Exponential Growth {#exponential-growth}
 
-The algorithm described in {{RFC5280}} grows exponentially in the worst case. In
+The `valid_policy_tree` grows exponentially in the worst case. In
 step (d.1) of {{Section 6.1.3 of !RFC5280}}, a single policy P can produce
 multiple child nodes if multiple issuer policies map to P. This can cause the
 tree size to increase in size multiplicatively at each level.
@@ -173,22 +186,38 @@ For example, if there are two intermediate certificates and one end-entity certi
 ~~~
 {: #exponential-tree title="An Example X.509 Policy Tree with Exponential Growth"}
 
-An attacker can use this behavior to mount a denial-of-service attack against
-an X.509-based application. The attacker sends such a certificate chain and
+## Attack Vector
+
+An attacker can use the exponential growth to mount a denial-of-service attack against
+an X.509-based application. The attacker sends certificate chain as in {{exponential-growth}} and
 triggers the target application's certificate validation process. For example,
 the target application may be a TLS {{?RFC8446}} server that performs client
-certificate validation. The above exponential growth means the target
+certificate validation. The target
 application will consume far more resources processing the input than the
 attacker consumed to send it, preventing it from servicing other clients.
 
-## Policy Graph {#policy-graph}
+# Avoiding Exponential Growth {#avoiding-exponential-growth}
 
-{{!RFC5280}} describes a tree structure, but this is an unnecessarily
-inefficient representation of this information. A single certificate policy may
-produce multiple nodes, but each node is identical, with identical children.
+The denial-of-service vulnerability described in {{dos}} can be mitigated by implementing a policy graph structure, described in this section.
 
-This document replaces the tree structure with a directed acyclic graph.
-Where {{!RFC5280}} adds multiple duplicate nodes, this document adds a single node with multiple parents.
+Compared the original policy tree structure described in {{!RFC5280}}, the policy graph grows linearly instead of exponentially.
+This document deprecates the original policy tree structure.
+X.509 implementations SHOULD instead perform policy validation by building a policy graph.
+This mitigates the denial-of-service attack by removing the asymmetric cost in policy validation.
+
+While this replacement process computes the same policies as in {{!RFC5280}}, one of the outputs is in a different form.
+See {{outputs}} for details.
+
+## Policy Graphs {#policy-graph}
+
+The tree structure from {{!RFC5280}} is an unnecessarily inefficient
+representation of a certification path's policy mappings. A single certificate
+policy may correspond to multiple nodes, but each node is identical, with identical
+children. This redundancy is the source of the exponential growth described in
+{{exponential-growth}}.
+
+A policy graph is a directed acyclic graph of policy nodes.
+Where {{!RFC5280}} adds multiple duplicate nodes, a policy graph adds a single node with multiple parents.
 See {{updates}} for the procedure for building this structure.
 {{exponential-tree-as-graph}} shows the updated representation of the example in {{exponential-tree}}.
 
@@ -234,10 +263,6 @@ policies ({{Section 4.2.1.4 of RFC5280}}) and policy mappings ({{Section 4.2.1.5
 of RFC5280}}). The policy tree from {{RFC5280}} is the tree of all paths from the root to a leaf in the policy graph,
 so no information is lost in the graph representation.
 
-Implementations of X.509 SHOULD implement a policy graph structure instead of a
-policy tree. This mitigates the denial-of-service attack by removing the
-asymmetric cost in policy validation.
-
 ## Verification Outputs {#outputs}
 
 {{Section 6.1.6 of RFC5280}} describes the entire `valid_policy_tree` structure as
@@ -249,72 +274,19 @@ An implementation which outputs the entire tree may be unable switch the format
 to a more efficient one, as described in {{policy-graph}}. X.509 implementations
 SHOULD NOT output the entire `valid_policy_tree` structure and instead SHOULD
 limit output to just the set of authorities-constrained and/or user-constrained
-policies, as described in {{X.509}}. X.509 implementations are additionally
+policies, as described in {{X.509}}.
+
+X.509 implementations are additionally
 RECOMMENDED to omit policy qualifiers from the output, as this simplifies the
 process. Note {{Section 4.2.1.4 of RFC5280}} conversely recommends that
 certificate authorities omit policy qualifiers from policy information terms.
 This document reiterates this and RECOMMENDS that certificate authorities omit
 the policyQualifiers field in PolicyInformation structures.
 
-# Other Mitigations
-
-X.509 implementations that are unable switch to the policy graph structure
-SHOULD mitigate the denial-of-service attack in other ways. This section
-describes alternate mitigation and partial mitigation strategies.
-
-## Limit Certificate Depth
-
-X.509 validators typically already allow limiting the depth of a certificate
-chain. This can limit the attack, however a large depth limit may still admit
-attacks. By modifying the example in {{exponential-growth}} to increase the
-number of policies asserted in each certificate, an attacker could still achieve
-O(N^(depth/2)) scaling or higher.
-
-## Limit Policy Tree Size
-
-If existing stable interfaces force the validator to build a full policy tree
-(see {{outputs}}), the validator SHOULD limit the number of nodes in the policy
-tree, and reject the certification path if this limit is reached.
-
-## Inhibit Policy Mapping
-
-If policy mapping is disabled via the initial-policy-mapping-inhibit setting
-(see {{Section 6.1.1 of RFC5280}}), the attack is mitigated. This also
-significantly simplifies the X.509 implementation, which reduces the risk of
-other security bugs. However, this will break compatibility with any existing
-certification paths which rely on policy mapping.
-
-To facilitate this mitigation, certificate authorities SHOULD NOT issue
-certificates with the policy mappings extension ({{Section 4.2.1.5 of
-RFC5280}}). Applications maintaining policies for accepted trust anchors are
-RECOMMENDED to forbid this extension in participating certificate authorities.
-
-## Disable Policy Checking
-
-An X.509 validator can mitigate this attack by disabling policy validation
-entirely. This may be viable for applications which do not require policy
-validation. In this case, critical policy-related extensions, notably the policy
-constraints ({{Section 4.2.1.11 of RFC5280}}), MUST be treated as unrecognized
-extensions as in {{Section 4.2 of RFC5280}} and be rejected.
-
-## Verify Signatures First
-
-X.509 validators SHOULD verify signatures in certification paths before or in
-conjunction with policy verification. This limits the attack to entities in
-control of CA certificates. For some applications, this may be sufficient to
-mitigate the attack. However, other applications may still be impacted. For
-example:
-
-* Any application that evaluates an untrusted PKI, such as a hosting provider
-  that evaluates a customer-supplied PKI
-
-* Any application that evaluates an otherwise trusted PKI, but where untrusted
-  entities have technically-constrained intermediate certificates where policy
-  mapping and path length are unconstrained.
-
 # Updates to RFC 5280 {#updates}
 
-This section provides updates to {{RFC5280}}.
+This section provides updates to {{RFC5280}}. This implements the changes
+described in {{avoiding-exponential-growth}}.
 
 ## Updates to Section 6.1
 
@@ -682,12 +654,67 @@ This update replaces {{Section 6.1.6 of RFC5280}} with the following text:
 > the `working_public_key`, the `working_public_key_algorithm`, and the
 > `working_public_key_parameters`.
 
+# Other Mitigations {#other-mitigations}
+
+X.509 implementations that are unable switch to the policy graph structure
+SHOULD mitigate the denial-of-service attack in other ways. This section
+describes alternate mitigation and partial mitigation strategies.
+
+## Limit Certificate Depth
+
+X.509 validators typically already allow limiting the depth of a certificate
+chain. This can limit the attack, however a large depth limit may still admit
+attacks. By modifying the example in {{exponential-growth}} to increase the
+number of policies asserted in each certificate, an attacker could still achieve
+O(N^(depth/2)) scaling or higher.
+
+## Limit Policy Tree Size
+
+If existing stable interfaces force the validator to build a full policy tree
+(see {{outputs}}), the validator SHOULD limit the number of nodes in the policy
+tree, and reject the certification path if this limit is reached.
+
+## Inhibit Policy Mapping
+
+If policy mapping is disabled via the initial-policy-mapping-inhibit setting
+(see {{Section 6.1.1 of RFC5280}}), the attack is mitigated. This also
+significantly simplifies the X.509 implementation, which reduces the risk of
+other security bugs. However, this will break compatibility with any existing
+certification paths which rely on policy mapping.
+
+To facilitate this mitigation, certificate authorities SHOULD NOT issue
+certificates with the policy mappings extension ({{Section 4.2.1.5 of
+RFC5280}}). Applications maintaining policies for accepted trust anchors are
+RECOMMENDED to forbid this extension in participating certificate authorities.
+
+## Disable Policy Checking
+
+An X.509 validator can mitigate this attack by disabling policy validation
+entirely. This may be viable for applications which do not require policy
+validation. In this case, critical policy-related extensions, notably the policy
+constraints ({{Section 4.2.1.11 of RFC5280}}), MUST be treated as unrecognized
+extensions as in {{Section 4.2 of RFC5280}} and be rejected.
+
+## Verify Signatures First
+
+X.509 validators SHOULD verify signatures in certification paths before or in
+conjunction with policy verification. This limits the attack to entities in
+control of CA certificates. For some applications, this may be sufficient to
+mitigate the attack. However, other applications may still be impacted. For
+example:
+
+* Any application that evaluates an untrusted PKI, such as a hosting provider
+  that evaluates a customer-supplied PKI
+
+* Any application that evaluates an otherwise trusted PKI, but where untrusted
+  entities have technically-constrained intermediate certificates where policy
+  mapping and path length are unconstrained.
+
 # Security Considerations
 
-{{exponential-growth}} discusses how {{!RFC5280}}'s policy tree algorithm leads
-to exponential growth. This flaw has led to denial-of-service vulnerabilities in
-real-world X.509-based applications, such as {{CVE-2023-0464}} and
-{{CVE-2023-23524}}.
+{{dos}} discusses how {{!RFC5280}}'s policy tree algorithm can lead to
+denial-of-service vulnerabilities in X.509-based applications, such as
+{{CVE-2023-0464}} and {{CVE-2023-23524}}.
 
 {{updates}} replaces this algorithm to avoid this issue. As discussed in
 {{policy-graph}}, the new structure scales linearly with the input. This means
