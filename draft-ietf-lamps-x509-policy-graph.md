@@ -242,13 +242,13 @@ certificate authorities omit policy qualifiers from policy information terms.
 This document reiterates this and RECOMMENDS that certificate authorities omit
 the policyQualifiers field in PolicyInformation structures.
 
-## Other Mitigations
+# Other Mitigations
 
 X.509 implementations that are unable switch to the policy graph structure
 SHOULD mitigate the denial-of-service attack in other ways. This section
 describes alternate mitigation and partial mitigation strategies.
 
-### Limit Certificate Depth
+## Limit Certificate Depth
 
 X.509 validators typically already allow limiting the depth of a certificate
 chain. This can limit the attack, however a large depth limit may still admit
@@ -256,13 +256,13 @@ attacks. By modifying the example in {{exponential-growth}} to increase the
 number of policies asserted in each certificate, an attacker could still achieve
 O(N^(depth/2)) scaling or higher.
 
-### Limit Policy Tree Size
+## Limit Policy Tree Size
 
 If existing stable interfaces force the validator to build a full policy tree
 (see {{outputs}}), the validator SHOULD limit the number of nodes in the policy
 tree, and reject the certification path if this limit is reached.
 
-### Inhibit Policy Mapping
+## Inhibit Policy Mapping
 
 If policy mapping is disabled via the initial-policy-mapping-inhibit setting
 (see {{Section 6.1.1 of RFC5280}}), the attack is mitigated. This also
@@ -275,7 +275,7 @@ certificates with the policy mappings extension ({{Section 4.2.1.5 of
 RFC5280}}). Applications maintaining policies for accepted trust anchors are
 RECOMMENDED to forbid this extension in participating certificate authorities.
 
-### Disable Policy Checking
+## Disable Policy Checking
 
 An X.509 validator can mitigate this attack by disabling policy validation
 entirely. This may be viable for applications which do not require policy
@@ -283,7 +283,7 @@ validation. In this case, critical policy-related extensions, notably the policy
 constraints ({{Section 4.2.1.11 of RFC5280}}), MUST be treated as unrecognized
 extensions as in {{Section 4.2 of RFC5280}} and be rejected.
 
-### Verify Signatures First
+## Verify Signatures First
 
 X.509 validators SHOULD verify signatures in certificate paths before or in
 conjunction with policy verification. This limits the attack to entities in
