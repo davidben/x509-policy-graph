@@ -278,12 +278,9 @@ policies, as described in {{X.509}}. {{update-outputs}} and
 {{other-mitigations}} discuss other mitigations for applications where this
 option is not available.
 
-X.509 implementations are additionally
-RECOMMENDED to omit policy qualifiers from the output, as this simplifies the
-process. Note {{Section 4.2.1.4 of RFC5280}} conversely recommends that
-certificate authorities omit policy qualifiers from policy information terms.
-This document reiterates this and RECOMMENDS that certificate authorities omit
-the policyQualifiers field in PolicyInformation structures.
+X.509 implementations MAY omit policy qualifiers from the output to simplify
+processing. Note {{Section 4.2.1.4 of RFC5280}} already recommends that
+certification authorities omit policy qualifiers from policy information terms.
 
 # Updates to RFC 5280 {#updates}
 
@@ -622,7 +619,7 @@ This update replaces step (g) of {{Section 6.1.5 of RFC5280}} with the following
       {:type="(%i)"}
       1. Add the node's `valid_policy` to `authority_constrained_policy_set`.
 
-      2. If returning policy qualifiers in the output, collect all qualifiers in the node, its ancestors, and descendants and associate them with `valid_policy`. Returning policy qualifiers in the output is NOT RECOMMENDED.
+      2. Collect all qualifiers in the node, its ancestors, and descendants and associate them with `valid_policy`. Applications that do not use policy qualifiers MAY skip this step to simplify processing.
 
    4. Set `user_constrained_policy_set` to `authority_constrained_policy_set`.
 
