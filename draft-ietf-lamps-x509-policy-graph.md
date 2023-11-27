@@ -270,11 +270,13 @@ an output of the verification process. Section 12.2 of {{X.509}} instead only
 outputs the authorities-constrained policies, the user-constrained policies,
 and their associated qualifiers.
 
-An implementation which outputs the entire tree may be unable switch the format
-to a more efficient one, as described in {{policy-graph}}. X.509 implementations
+As the `valid_policy_tree` is the exponential structure, computing it
+reintroduces the denial-of-service vulnerability. X.509 implementations
 SHOULD NOT output the entire `valid_policy_tree` structure and instead SHOULD
 limit output to just the set of authorities-constrained and/or user-constrained
-policies, as described in {{X.509}}.
+policies, as described in {{X.509}}. {{update-outputs}} and
+{{other-mitigations}} discuss other mitigations for applications where this
+option is not available.
 
 X.509 implementations are additionally
 RECOMMENDED to omit policy qualifiers from the output, as this simplifies the
@@ -645,7 +647,7 @@ NEW:
 > zero or (2) the `user_constrained_policy_set` is not empty, then path processing
 > has succeeded.
 
-## Updates to Section 6.1.6
+## Updates to Section 6.1.6 {#update-outputs}
 
 This update replaces {{Section 6.1.6 of RFC5280}} with the following text:
 
@@ -653,6 +655,21 @@ This update replaces {{Section 6.1.6 of RFC5280}} with the following text:
 > success indication together with final value of the `user_constrained_policy_set`,
 > the `working_public_key`, the `working_public_key_algorithm`, and the
 > `working_public_key_parameters`.
+>
+> Note the original procedure described in {{RFC5280}} included a
+> `valid_policy_tree` structure as part of the output. This structure grows
+> exponentially in the size of the input, so computing it risks
+> denial-of-service vulernabilities in X.509-based applications, such as
+> {{CVE-2023-0464}} and {{CVE-2023-23524}}. Accordingly, this output is
+> deprecated. Computing this structure is NOT RECOMMENDED.
+>
+> An implementation which requires `valid_policy_tree` for compatibility with
+> legacy systems may compute it from `valid_policy_graph` by recursively
+> duplicating every multi-parent node. This may be done on-demand when the
+> calling application first requests this output. However, this computation may
+> consume exponential time and memory, so such implementations SHOULD mitigate
+> denial-of-service in other ways, such as limiting the depth or size of the
+> tree.
 
 # Other Mitigations {#other-mitigations}
 
