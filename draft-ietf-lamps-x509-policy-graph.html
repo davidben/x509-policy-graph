@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Updates to X.509 Policy Validation</title>
+<meta content="David Benjamin" name="author">
+<meta content="
+       This document updates RFC 5280 to replace the algorithm for X.509 policy
+validation with an equivalent, more efficient algorithm. The original algorithm
+built a structure which scaled exponentially in the worst case, leaving
+implementations vulnerable to denial-of-service attacks. 
+    " name="description">
+<meta content="xml2rfc 3.18.2" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-ietf-lamps-x509-policy-graph-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.18.2
+    Python 3.11.6
+    ConfigArgParse 1.5.3
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.3
+    platformdirs 4.0.0
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.31.0
+    setuptools 67.7.2
+    six 1.16.0
+    wcwidth 0.2.10
+-->
+<link href="draft-ietf-lamps-x509-policy-graph.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 1;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl.olPercent {
+  --indent: 5ch;
+}
+dl > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+  margin-right: 1ch;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 2px 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 10ch;
+  margin-right: 1.5ch;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 12ch !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+  .toplink {
+    display: none;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Updates to X.509 Policy Validation</td>
+<td class="right">November 2023</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Benjamin</td>
+<td class="center">Expires 30 May 2024</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Limited Additional Mechanisms for PKIX and SMIME</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-ietf-lamps-x509-policy-graph-latest</dd>
+<dt class="label-updates">Updates:</dt>
+<dd class="updates">
+<a href="https://www.rfc-editor.org/rfc/rfc5280" class="eref">5280</a> (if approved)</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2023-11-27" class="published">27 November 2023</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2024-05-30">30 May 2024</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">D. Benjamin</div>
+<div class="org">Google LLC</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Updates to X.509 Policy Validation</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document updates RFC 5280 to replace the algorithm for X.509 policy
+validation with an equivalent, more efficient algorithm. The original algorithm
+built a structure which scaled exponentially in the worst case, leaving
+implementations vulnerable to denial-of-service attacks.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Discussion of this document takes place on the
+    Limited Additional Mechanisms for PKIX and SMIME Working Group mailing list (spasm@ietf.org),
+    which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/spasm/">https://mailarchive.ietf.org/arch/browse/spasm/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+    <span><a href="https://github.com/davidben/x509-policy-graph">https://github.com/davidben/x509-policy-graph</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 30 May 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2023 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-summary-of-changes-from-rfc" class="internal xref">Summary of Changes from RFC 5280</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-denial-of-service-vulnerabi" class="internal xref">Denial of Service Vulnerability</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-policy-trees" class="internal xref">Policy Trees</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-exponential-growth" class="internal xref">Exponential Growth</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-attack-vector" class="internal xref">Attack Vector</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-avoiding-exponential-growth" class="internal xref">Avoiding Exponential Growth</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-policy-graphs" class="internal xref">Policy Graphs</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-verification-outputs" class="internal xref">Verification Outputs</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-updates-to-rfc-5280" class="internal xref">Updates to RFC 5280</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-updates-to-section-61" class="internal xref">Updates to Section 6.1</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-updates-to-section-612" class="internal xref">Updates to Section 6.1.2</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-updates-to-section-613" class="internal xref">Updates to Section 6.1.3</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-updates-to-section-614" class="internal xref">Updates to Section 6.1.4</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-updates-to-section-615" class="internal xref">Updates to Section 6.1.5</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-updates-to-section-616" class="internal xref">Updates to Section 6.1.6</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-other-mitigations" class="internal xref">Other Mitigations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-limit-certificate-depth" class="internal xref">Limit Certificate Depth</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-limit-policy-tree-size" class="internal xref">Limit Policy Tree Size</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-inhibit-policy-mapping" class="internal xref">Inhibit Policy Mapping</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-disable-policy-checking" class="internal xref">Disable Policy Checking</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-verify-signatures-first" class="internal xref">Verify Signatures First</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1"><span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> defines a suite of extensions for specifying certificate policies,
+along with a mechanism for mapping policies between subject and issuer policy
+domains in cross-certificates. This mechanism, when evaluated according to the
+algorithm in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>], <a href="https://rfc-editor.org/rfc/rfc5280#section-6.1" class="relref">Section 6.1</a></span> produces a policy tree, describing
+policies asserted by each certificate, and mappings between them. This tree can
+grow exponentially in the depth of the certification path. This cost asymmetry
+can lead to a denial-of-service vulnerability in X.509-based applications, such
+as <span>[<a href="#CVE-2023-0464" class="cite xref">CVE-2023-0464</a>]</span> and <span>[<a href="#CVE-2023-23524" class="cite xref">CVE-2023-23524</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2"><a href="#dos" class="auto internal xref">Section 3</a> describes this vulnerability. <a href="#policy-graph" class="auto internal xref">Section 4.1</a> describes the primary
+mitigation for this vulnerability, a replacement for the policy tree structure.
+<a href="#updates" class="auto internal xref">Section 5</a> provides updates to <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> which implement this change.
+Finally, <a href="#other-mitigations" class="auto internal xref">Section 6</a> discusses alternative mitigation strategies for
+X.509 applications.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<div id="summary-of-changes-from-rfc-5280">
+<section id="section-1.1">
+        <h3 id="name-summary-of-changes-from-rfc">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-summary-of-changes-from-rfc" class="section-name selfRef">Summary of Changes from RFC 5280</a>
+        </h3>
+<p id="section-1.1-1">The algorithm for processing certificate policies and policy mappings is
+replaced with one which builds an equivalent, but much more efficient structure.
+This new algorithm does not change the validity status of any certification
+path, nor which certificate policies are valid for it.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span>
+when, and only when, they appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dos">
+<section id="section-3">
+      <h2 id="name-denial-of-service-vulnerabi">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-denial-of-service-vulnerabi" class="section-name selfRef">Denial of Service Vulnerability</a>
+      </h2>
+<p id="section-3-1">This section discusses how the path validation algorithm defined in
+<span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.2" class="relref">Section 6.1.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> can lead to a denial-of-service vulnerability in
+X.509-based applications.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="policy-trees">
+<section id="section-3.1">
+        <h3 id="name-policy-trees">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-policy-trees" class="section-name selfRef">Policy Trees</a>
+        </h3>
+<p id="section-3.1-1"><span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.2" class="relref">Section 6.1.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> constructs the <code>valid_policy_tree</code>, a tree of
+certificate policies, during certification path validation.
+The nodes at any given depth in the tree correspond to
+policies asserted by a certificate in the certification path. A node's
+parent policy is the policy in the issuer certificate which was mapped to this
+policy, and a node's children are the policies it was mapped to in the subject
+certificate.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">For example, suppose a certification path contains:<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-3.1">
+            <p id="section-3.1-3.1.1">An intermediate certificate which asserts policy object identifiers (OIDs)
+OID1, OID2, and OID5. It contains mappings OID1 to OID3, and OID1 to OID4.<a href="#section-3.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.1-3.2">
+            <p id="section-3.1-3.2.1">An end-entity certificate which asserts policy OIDs OID2, OID3, and OID6.<a href="#section-3.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.1-4">This would result in the tree shown in <a href="#basic-tree" class="auto internal xref">Figure 1</a>.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<span id="name-an-example-x509-policy-tree"></span><div id="basic-tree">
+<figure id="figure-1">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-3.1-5.1">
+<pre>
+                         +-----------+
+        Root:            | anyPolicy |
+                         +-----------+
+                         |{anyPolicy}|
+                         +-----------+
+                          /          \
+                         /            \
+                        v              v
+               +------------+      +------------+
+Intermediate:  |    OID1    |      |    OID2    |
+               +------------+      +------------+
+               |{OID3, OID4}|      |   {OID2}   |
+               +------------+      +------------+
+                     |                   |
+                     |                   |
+                     v                   v
+               +------------+      +------------+
+  End-entity:  |    OID3    |      |    OID2    |
+               +------------+      +------------+
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-an-example-x509-policy-tree" class="selfRef">An Example X.509 Policy Tree</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.1-6">The complete algorithm for building this structure is described in steps (d),
+(e), and (f) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.3" class="relref">Section 6.1.3</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, steps (h), (i), (j) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.4" class="relref">Section 6.1.4</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, and steps (a), (b), and (g) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.5" class="relref">Section 6.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="exponential-growth">
+<section id="section-3.2">
+        <h3 id="name-exponential-growth">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-exponential-growth" class="section-name selfRef">Exponential Growth</a>
+        </h3>
+<p id="section-3.2-1">The <code>valid_policy_tree</code> grows exponentially in the worst case. In
+step (d.1) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.3" class="relref">Section 6.1.3</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, a single policy P can produce
+multiple child nodes if multiple issuer policies map to P. This can cause the
+tree size to increase in size multiplicatively at each level.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">In particular, consider a certificate chain where every intermediate certificate
+asserts policies OID1 and OID2, and then contains the full Cartesian product of
+mappings:<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-3.1">
+            <p id="section-3.2-3.1.1">OID1 maps to OID1<a href="#section-3.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-3.2">
+            <p id="section-3.2-3.2.1">OID1 maps to OID2<a href="#section-3.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-3.3">
+            <p id="section-3.2-3.3.1">OID2 maps to OID1<a href="#section-3.2-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-3.4">
+            <p id="section-3.2-3.4.1">OID2 maps to OID2<a href="#section-3.2-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.2-4">At each depth, the tree would double in size.
+For example, if there are two intermediate certificates and one end-entity certificate, the resulting tree would be as depicted in <a href="#exponential-tree" class="auto internal xref">Figure 2</a>.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<span id="name-an-example-x509-policy-tree-"></span><div id="exponential-tree">
+<figure id="figure-2">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-3.2-5.1">
+<pre>
+                        +-----------------------+
+                        |        anyPolicy      |
+                        +-----------------------+
+                        |       {anyPolicy}     |
+                        +-----------------------+
+                         /                     \
+                        /                       \
+                       v                         v
+            +------------+                      +------------+
+            |    OID1    |                      |    OID2    |
+            +------------+                      +------------+
+            |{OID1, OID2}|                      |{OID1, OID2}|
+            +------------+                      +------------+
+             /         \                          /         \
+            /           \                        /           \
+           v             v                      v             v
+  +------------+    +------------+    +------------+    +------------+
+  |    OID1    |    |    OID2    |    |    OID1    |    |    OID2    |
+  +------------+    +------------+    +------------+    +------------+
+  |{OID1, OID2}|    |{OID1, OID2}|    |{OID1, OID2}|    |{OID1, OID2}|
+  +------------+    +------------+    +------------+    +------------+
+    |       |         |       |         |       |         |       |
+    v       v         v       v         v       v         v       v
++------+ +------+ +------+ +------+ +------+ +------+ +------+ +------+
+| OID1 | | OID2 | | OID1 | | OID2 | | OID1 | | OID2 | | OID1 | | OID2 |
++------+ +------+ +------+ +------+ +------+ +------+ +------+ +------+
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-an-example-x509-policy-tree-" class="selfRef">An Example X.509 Policy Tree with Exponential Growth</a>
+          </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="attack-vector">
+<section id="section-3.3">
+        <h3 id="name-attack-vector">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-attack-vector" class="section-name selfRef">Attack Vector</a>
+        </h3>
+<p id="section-3.3-1">An attacker can use the exponential growth to mount a denial-of-service attack against
+an X.509-based application. The attacker sends certificate chain as in <a href="#exponential-growth" class="auto internal xref">Section 3.2</a> and
+triggers the target application's certificate validation process. For example,
+the target application may be a TLS <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> server that performs client
+certificate validation. The target
+application will consume far more resources processing the input than the
+attacker consumed to send it, preventing it from servicing other clients.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="avoiding-exponential-growth">
+<section id="section-4">
+      <h2 id="name-avoiding-exponential-growth">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-avoiding-exponential-growth" class="section-name selfRef">Avoiding Exponential Growth</a>
+      </h2>
+<p id="section-4-1">The denial-of-service vulnerability described in <a href="#dos" class="auto internal xref">Section 3</a> can be mitigated by implementing a policy graph structure, described in this section.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">Compared the original policy tree structure described in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, the policy graph grows linearly instead of exponentially.
+This document deprecates the original policy tree structure.
+X.509 implementations SHOULD instead perform policy validation by building a policy graph.
+This mitigates the denial-of-service attack by removing the asymmetric cost in policy validation.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">While this replacement process computes the same policies as in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, one of the outputs is in a different form.
+See <a href="#outputs" class="auto internal xref">Section 4.2</a> for details.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<div id="policy-graph">
+<section id="section-4.1">
+        <h3 id="name-policy-graphs">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-policy-graphs" class="section-name selfRef">Policy Graphs</a>
+        </h3>
+<p id="section-4.1-1">The tree structure from <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> is an unnecessarily inefficient
+representation of a certification path's policy mappings. A single certificate
+policy may correspond to multiple nodes, but each node is identical, with identical
+children. This redundancy is the source of the exponential growth described in
+<a href="#exponential-growth" class="auto internal xref">Section 3.2</a>.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">A policy graph is a directed acyclic graph of policy nodes.
+Where <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> adds multiple duplicate nodes, a policy graph adds a single node with multiple parents.
+See <a href="#updates" class="auto internal xref">Section 5</a> for the procedure for building this structure.
+<a href="#exponential-tree-as-graph" class="auto internal xref">Figure 3</a> shows the updated representation of the example in <a href="#exponential-tree" class="auto internal xref">Figure 2</a>.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<span id="name-a-more-efficient-representa"></span><div id="exponential-tree-as-graph">
+<figure id="figure-3">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.1-3.1">
+<pre>
+              +-----------+
+              | anyPolicy |
+              +-----------+
+              |{anyPolicy}|
+              +-----------+
+              /           \
+             /             \
+            v               v
+     +------------+  +------------+
+     |    OID1    |  |    OID2    |
+     +------------+  +------------+
+     |{OID1, OID2}|  |{OID1, OID2}|
+     +------------+  +------------+
+          |      \    /     |
+          |       \  /      |
+          |        \/       |
+          |        /\       |
+          |       /  \      |
+          v      v    v     v
+     +------------+  +------------+
+     |    OID1    |  |    OID2    |
+     +------------+  +------------+
+     |{OID1, OID2}|  |{OID1, OID2}|
+     +------------+  +------------+
+          |      \    /     |
+          |       \  /      |
+          |        \/       |
+          |        /\       |
+          |       /  \      |
+          v      v    v     v
+     +------------+  +------------+
+     |    OID1    |  |    OID2    |
+     +------------+  +------------+
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-a-more-efficient-representa" class="selfRef">A More Efficient Representation of an X.509 Policy Tree</a>
+          </figcaption></figure>
+</div>
+<p id="section-4.1-4">This graph's size is bounded linearly by the total number of certificate
+policies (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.4" class="relref">Section 4.2.1.4</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>) and policy mappings (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.5" class="relref">Section 4.2.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>). The policy tree from <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> is the tree of all paths from the root to a leaf in the policy graph,
+so no information is lost in the graph representation.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="outputs">
+<section id="section-4.2">
+        <h3 id="name-verification-outputs">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-verification-outputs" class="section-name selfRef">Verification Outputs</a>
+        </h3>
+<p id="section-4.2-1"><span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.6" class="relref">Section 6.1.6</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> describes the entire <code>valid_policy_tree</code> structure as
+an output of the verification process. Section 12.2 of <span>[<a href="#X.509" class="cite xref">X.509</a>]</span> instead only
+outputs the authorities-constrained policies, the user-constrained policies,
+and their associated qualifiers.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">As the <code>valid_policy_tree</code> is the exponential structure, computing it
+reintroduces the denial-of-service vulnerability. X.509 implementations
+SHOULD NOT output the entire <code>valid_policy_tree</code> structure and instead SHOULD
+limit output to just the set of authorities-constrained and/or user-constrained
+policies, as described in <span>[<a href="#X.509" class="cite xref">X.509</a>]</span>. <a href="#update-outputs" class="auto internal xref">Section 5.6</a> and
+<a href="#other-mitigations" class="auto internal xref">Section 6</a> discuss other mitigations for applications where this
+option is not available.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">X.509 implementations MAY omit policy qualifiers from the output to simplify
+processing. Note <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.4" class="relref">Section 4.2.1.4</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> already recommends that
+certification authorities omit policy qualifiers from policy information terms.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="updates">
+<section id="section-5">
+      <h2 id="name-updates-to-rfc-5280">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-updates-to-rfc-5280" class="section-name selfRef">Updates to RFC 5280</a>
+      </h2>
+<p id="section-5-1">This section provides updates to <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>. This implements the changes
+described in <a href="#avoiding-exponential-growth" class="auto internal xref">Section 4</a>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="updates-to-section-61">
+<section id="section-5.1">
+        <h3 id="name-updates-to-section-61">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-updates-to-section-61" class="section-name selfRef">Updates to Section 6.1</a>
+        </h3>
+<p id="section-5.1-1">This update replaces a paragraph of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> as follows:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">OLD:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.1-3.1">
+            <p id="section-5.1-3.1.1">A particular certification path may not, however, be appropriate for
+  all applications.  Therefore, an application MAY augment this
+  algorithm to further limit the set of valid paths.  The path
+  validation process also determines the set of certificate policies
+  that are valid for this path, based on the certificate policies
+  extension, policy mappings extension, policy constraints extension,
+  and inhibit anyPolicy extension.  To achieve this, the path
+  validation algorithm constructs a valid policy tree.  If the set of
+  certificate policies that are valid for this path is not empty, then
+  the result will be a valid policy tree of depth n, otherwise the
+  result will be a null valid policy tree.<a href="#section-5.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-4">NEW:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.1-5.1">
+            <p id="section-5.1-5.1.1">A particular certification path may not, however, be appropriate for
+  all applications.  Therefore, an application MAY augment this
+  algorithm to further limit the set of valid paths.  The path
+  validation process also determines the set of certificate policies
+  that are valid for this path, based on the certificate policies
+  extension, policy mappings extension, policy constraints extension,
+  and inhibit anyPolicy extension.  To achieve this, the path
+  validation algorithm constructs a valid policy set, which may be empty if
+  no certificate policies are valid for this path.<a href="#section-5.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="updates-to-section-612">
+<section id="section-5.2">
+        <h3 id="name-updates-to-section-612">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-updates-to-section-612" class="section-name selfRef">Updates to Section 6.1.2</a>
+        </h3>
+<p id="section-5.2-1">This update replaces entry (a) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.2" class="relref">Section 6.1.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> with the following text:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.2-2">
+<dt>(a)</dt>
+<dd id="section-5.2-2.1">
+            <p id="section-5.2-2.1.1"><code>valid_policy_graph</code>:  A directed acyclic graph of certificate
+policies with their optional qualifiers; each of the leaves
+of the graph represents a valid policy at this stage in the
+certification path validation.  If valid policies exist at
+this stage in the certification path validation, the depth of
+the graph is equal to the number of certificates in the chain
+that have been processed.  If valid policies do not exist at
+this stage in the certification path validation, the graph is
+set to NULL.  Once the graph is set to NULL, policy processing
+ceases.  Implementations MAY omit qualifiers if not returned
+in the output.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2.1.2">
+Each node in the <code>valid_policy_graph</code> includes three data objects:
+the valid policy, a set of associated policy qualifiers, and a set of
+one or more expected policy values.<a href="#section-5.2-2.1.2" class="pilcrow">¶</a></p>
+<p id="section-5.2-2.1.3">
+Nodes in the graph can be divided into depths, numbered starting from zero.
+A node at depth x can have zero or more children at depth x+1, with the
+exception of depth zero, one or more parents at depth x-1. No other edges
+between nodes may exist.<a href="#section-5.2-2.1.3" class="pilcrow">¶</a></p>
+<p id="section-5.2-2.1.4">
+If the node is at depth x, the components of the node have
+the following semantics:<a href="#section-5.2-2.1.4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.2-2.1.5">
+<dt>(1)</dt>
+<dd id="section-5.2-2.1.5.1">
+                <p id="section-5.2-2.1.5.1.1">The <code>valid_policy</code> is a single policy OID representing a valid policy for the path of length x.<a href="#section-5.2-2.1.5.1.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(2)</dt>
+<dd id="section-5.2-2.1.5.2">
+                <p id="section-5.2-2.1.5.2.1">The <code>qualifier_set</code> is a set of policy qualifiers associated with the valid policy in certificate x.
+It is only necessary to maintain this field if policy qualifiers are returned to the application.
+See Section 6.1.5, step (g).<a href="#section-5.2-2.1.5.2.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(3)</dt>
+<dd id="section-5.2-2.1.5.3">
+                <p id="section-5.2-2.1.5.3.1">The <code>expected_policy_set</code> contains one or more policy OIDs that would satisfy this policy in the certificate x+1.<a href="#section-5.2-2.1.5.3.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+<p id="section-5.2-2.1.6">
+The initial value of the <code>valid_policy_graph</code> is a single node with
+<code>valid_policy</code> anyPolicy, an empty <code>qualifier_set</code>, and an
+<code>expected_policy_set</code> with the single value anyPolicy.  This node is
+considered to be at depth zero.<a href="#section-5.2-2.1.6" class="pilcrow">¶</a></p>
+<p id="section-5.2-2.1.7">
+The graph additionally satisfies the following invariants:<a href="#section-5.2-2.1.7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-2.1.8.1">
+                <p id="section-5.2-2.1.8.1.1">For any depth x and policy OID P-OID, there is at most one node at depth x whose <code>valid_policy</code> is P-OID.<a href="#section-5.2-2.1.8.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-2.1.8.2">
+                <p id="section-5.2-2.1.8.2.1">The <code>expected_policy_set</code> of a node whose <code>valid_policy</code> is anyPolicy is always {anyPolicy}.<a href="#section-5.2-2.1.8.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-2.1.8.3">
+                <p id="section-5.2-2.1.8.3.1">A node at depth x whose <code>valid_policy</code> is anyPolicy, except for the one at
+depth zero, always has exactly one parent: a node at depth x-1 whose
+<code>valid_policy</code> is also anyPolicy.<a href="#section-5.2-2.1.8.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-2.1.8.4">
+                <p id="section-5.2-2.1.8.4.1">Each node at depth greater than 0 has either one or more parent nodes whose <code>valid_policy</code> is not anyPolicy,
+or a single parent node whose <code>valid_policy</code> is anyPolicy.
+That is, a node cannot simultaneously be a child of both anyPolicy and some non-anyPolicy OID.<a href="#section-5.2-2.1.8.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-5.2-2.1.9">
+<a href="#graph-initial" class="auto internal xref">Figure 4</a> is a graphic representation of the initial state of the
+<code>valid_policy_graph</code>.  Additional figures will use this format to
+describe changes in the <code>valid_policy_graph</code> during path processing.<a href="#section-5.2-2.1.9" class="pilcrow">¶</a></p>
+<span id="name-initial-value-of-the-valid_"></span><div id="graph-initial">
+<figure id="figure-4">
+              <div class="alignLeft art-ascii-art art-text artwork" id="section-5.2-2.1.10.1">
+<pre>
+    +----------------+
+    |   anyPolicy    |   &lt;---- valid_policy
+    +----------------+
+    |       {}       |   &lt;---- qualifier_set
+    +----------------+
+    |  {anyPolicy}   |   &lt;---- expected_policy_set
+    +----------------+
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-initial-value-of-the-valid_" class="selfRef">Initial value of the valid_policy_graph State Variable</a>
+              </figcaption></figure>
+</div>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="updates-to-section-613">
+<section id="section-5.3">
+        <h3 id="name-updates-to-section-613">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-updates-to-section-613" class="section-name selfRef">Updates to Section 6.1.3</a>
+        </h3>
+<p id="section-5.3-1">This update replaces steps (d), (e), and (f) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.3" class="relref">Section 6.1.3</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> with the following text:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.3-2">
+<dt>(d)</dt>
+<dd id="section-5.3-2.1">
+            <p id="section-5.3-2.1.1">If the certificate policies extension is present in the
+certificate and the <code>valid_policy_graph</code> is not NULL, process
+the policy information by performing the following steps in
+order:<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.3-2.1.2">
+<dt>(1)</dt>
+<dd id="section-5.3-2.1.2.1">
+                <p id="section-5.3-2.1.2.1.1">For each policy P not equal to anyPolicy in the certificate policies extension,
+let P-OID denote the OID for policy P and P-Q denote the qualifier set for policy P.
+Perform the following steps in order:<a href="#section-5.3-2.1.2.1.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.3-2.1.2.1.2">
+<dt>(i)</dt>
+<dd id="section-5.3-2.1.2.1.2.1">
+                    <p id="section-5.3-2.1.2.1.2.1.1">Let <code>parent_nodes</code> be the nodes at depth i-1 in the <code>valid_policy_graph</code> where P-OID is in the <code>expected_policy_set</code>.
+If <code>parent_nodes</code> is not empty, create a child node as follows:
+set the <code>valid_policy</code> to P-OID, set the <code>qualifier_set</code> to P-Q, set the <code>expected_policy_set</code> to {P-OID}, and set the parent nodes to <code>parent_nodes</code>.<a href="#section-5.3-2.1.2.1.2.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.1.2.1.2">
+For example, consider a <code>valid_policy_graph</code> with a node of depth i-1 where the <code>expected_policy_set</code> is {Gold, White},
+and a second node where the <code>expected_policy_set</code> is {Gold, Yellow}.
+Assume the certificate policies Gold and Silver appear in the certificate policies extension of certificate i.
+The Gold policy is matched, but the Silver policy is not.
+This rule will generate a child node of depth i for the Gold policy.
+The result is shown as <a href="#exact-match" class="auto internal xref">Figure 5</a>.<a href="#section-5.3-2.1.2.1.2.1.2" class="pilcrow">¶</a></p>
+<span id="name-processing-an-exact-match"></span><div id="exact-match">
+<figure id="figure-5">
+                      <div class="alignLeft art-ascii-art art-text artwork" id="section-5.3-2.1.2.1.2.1.3.1">
+<pre>
+    +-----------------+      +-----------------+
+    |       Red       |      |       Blue      |
+    +-----------------+      +-----------------+
+    |       {}        |      |       {}        |   depth i-1
+    +-----------------+      +-----------------+
+    |  {Gold, White}  |      |  {Gold, Yellow} |
+    +-----------------+      +-----------------+
+                \                   /
+                 \                 /
+                  \               /
+                   v             v
+                 +-----------------+
+                 |      Gold       |
+                 +-----------------+
+                 |       {}        |   depth i
+                 +-----------------+
+                 |     {Gold}      |
+                 +-----------------+
+</pre>
+</div>
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<a href="#name-processing-an-exact-match" class="selfRef">Processing an Exact Match</a>
+                      </figcaption></figure>
+</div>
+</dd>
+                  <dd class="break"></dd>
+<dt>(ii)</dt>
+<dd id="section-5.3-2.1.2.1.2.2">
+                    <p id="section-5.3-2.1.2.1.2.2.1">If there was no match in step (i) and the <code>valid_policy_graph</code> includes a node of depth i-1 with the <code>valid_policy</code> anyPolicy,
+generate a child node with the following values:
+set the <code>valid_policy</code> to P-OID, set the <code>qualifier_set</code> to P-Q, set the <code>expected_policy_set</code> to {P-OID},
+and set the parent node to the anyPolicy node at depth i-1.<a href="#section-5.3-2.1.2.1.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.1.2.2.2">
+For example, consider a <code>valid_policy_graph</code> with a node
+of depth i-1 where the <code>valid_policy</code> is anyPolicy.
+Assume the certificate policies Gold and Silver appear
+in the certificate policies extension of certificate
+i.  The Gold policy does not have a qualifier, but the
+Silver policy has the qualifier Q-Silver.  If Gold and
+Silver were not matched in (i) above, this rule will
+generate two child nodes of depth i, one for each
+policy.  The result is shown as <a href="#unmatched-anypolicy" class="auto internal xref">Figure 6</a>.<a href="#section-5.3-2.1.2.1.2.2.2" class="pilcrow">¶</a></p>
+<span id="name-processing-unmatched-polici"></span><div id="unmatched-anypolicy">
+<figure id="figure-6">
+                      <div class="alignLeft art-ascii-art art-text artwork" id="section-5.3-2.1.2.1.2.2.3.1">
+<pre>
+                  +-----------------+
+                  |    anyPolicy    |
+                  +-----------------+
+                  |       {}        |
+                  +-----------------+   depth i-1
+                  |   {anyPolicy}   |
+                  +-----------------+
+                     /           \
+                    /             \
+                   /               \
+                  /                 \
+    +-----------------+          +-----------------+
+    |      Gold       |          |     Silver      |
+    +-----------------+          +-----------------+
+    |       {}        |          |   {Q-Silver}    |   depth i
+    +-----------------+          +-----------------+
+    |     {Gold}      |          |    {Silver}     |
+    +-----------------+          +-----------------+
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-processing-unmatched-polici" class="selfRef">Processing Unmatched Policies when a Leaf Node Specifies anyPolicy</a>
+                      </figcaption></figure>
+</div>
+</dd>
+                <dd class="break"></dd>
+</dl>
+</dd>
+              <dd class="break"></dd>
+<dt>(2)</dt>
+<dd id="section-5.3-2.1.2.2">
+                <p id="section-5.3-2.1.2.2.1">If the certificate policies extension includes the policy anyPolicy with the qualifier set AP-Q and either (a)
+<code>inhibit_anyPolicy</code> is greater than 0 or (b) i&lt;n and the certificate is self-issued, then:<a href="#section-5.3-2.1.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.2.2">
+For each policy OID P-OID (including anyPolicy) which appears in the <code>expected_policy_set</code> of some node in the <code>valid_policy_graph</code> for depth i-1,
+if P-OID does not appear as the <code>valid_policy</code> of some node at depth i, create a single child node with the following values:
+set the <code>valid_policy</code> to P-OID, set the <code>qualifier_set</code> to AP-Q, set the <code>expected_policy_set</code> to {P-OID},
+and set the parents to the nodes at depth i-1 where P-OID appears in <code>expected_policy_set</code>.<a href="#section-5.3-2.1.2.2.2" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.2.3">
+This is equivalent to running step (1) above, as if the certificate policies extension contained a policy with OID P-OID and qualifier set AP-Q.<a href="#section-5.3-2.1.2.2.3" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.2.4">
+For example, consider a <code>valid_policy_graph</code> with a node of depth i-1 where the <code>expected_policy_set</code> is {Gold, Silver},
+and a second node of depth i-1 where the <code>expected_policy_set</code> is {Gold, Bronze}.
+Assume anyPolicy appears in the certificate policies extension of certificate i with policy qualifiers AP-Q, but Gold and Silver do not appear.
+This rule will generate two child nodes of depth i, one for each policy.
+The result is shown below as <a href="#anypolicy-in-extension" class="auto internal xref">Figure 7</a>.<a href="#section-5.3-2.1.2.2.4" class="pilcrow">¶</a></p>
+<span id="name-processing-unmatched-policie"></span><div id="anypolicy-in-extension">
+<figure id="figure-7">
+                  <div class="alignLeft art-ascii-art art-text artwork" id="section-5.3-2.1.2.2.5.1">
+<pre>
+    +-----------------+   +-----------------+
+    |       Red       |   |       Blue      |
+    +-----------------+   +-----------------+
+    |       {}        |   |       {}        |   depth i-1
+    +-----------------+   +-----------------+
+    |  {Gold, Silver} |   |  {Gold, Bronze} |
+    +-----------------+   +-----------------+
+            |         \            |
+            |          \           |
+            |           \          |
+            |            \         |
+            |             \        |
+            v              v       v
+    +-----------------+   +-----------------+
+    |     Silver      |   |       Gold      |
+    +-----------------+   +-----------------+
+    |     {AP-Q}      |   |      {AP-Q}     |   depth i
+    +-----------------+   +-----------------+
+    |    {Silver}     |   |      {Gold}     |
+    +-----------------+   +-----------------+
+</pre>
+</div>
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
+<a href="#name-processing-unmatched-policie" class="selfRef">Processing Unmatched Policies When the Certificate Policies Extension Specifies anyPolicy</a>
+                  </figcaption></figure>
+</div>
+</dd>
+              <dd class="break"></dd>
+<dt>(3)</dt>
+<dd id="section-5.3-2.1.2.3">
+                <p id="section-5.3-2.1.2.3.1">If there is a node in the <code>valid_policy_graph</code> of depth i-1 or less without any child nodes, delete that node.
+Repeat this step until there are no nodes of depth i-1 or less without children.<a href="#section-5.3-2.1.2.3.1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2.1.2.3.2">
+For example, consider the valid_policy_graph shown in <a href="#pruning" class="auto internal xref">Figure 8</a> below.
+The two nodes at depth i-1 that are marked with an 'X' have no children, and they are deleted.
+Applying this rule to the resulting graph will cause the nodes at depth i-2 that is marked with a 'Y' to be deleted.
+In the resulting graph, there are no nodes of depth i-1 or less without children, and this step is complete.<a href="#section-5.3-2.1.2.3.2" class="pilcrow">¶</a></p>
+<span id="name-pruning-the-valid_policy_gr"></span><div id="pruning">
+<figure id="figure-8">
+                  <div class="alignLeft art-ascii-art art-text artwork" id="section-5.3-2.1.2.3.3.1">
+<pre>
+                  +-----------+
+                  |           | depth i-3
+                  +-----------+
+                  /     |     \
+                 /      |      \
+                /       |       \
+    +-----------+ +-----------+ +-----------+
+    |           | |           | |     Y     | depth i-2
+    +-----------+ +-----------+ +-----------+
+          |     \       |             |
+          |      \      |             |
+          |       \     |             |
+    +-----------+ +-----------+ +-----------+
+    |     X     | |           | |     X     | depth i-1
+    +-----------+ +-----------+ +-----------+
+                   /    |    \
+                  /     |     \
+                 /      |      \
+    +-----------+ +-----------+ +-----------+
+    |           | |           | |           | depth i
+    +-----------+ +-----------+ +-----------+
+</pre>
+</div>
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<a href="#name-pruning-the-valid_policy_gr" class="selfRef">Pruning the valid_policy_graph</a>
+                  </figcaption></figure>
+</div>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</dd>
+          <dd class="break"></dd>
+<dt>(e)</dt>
+<dd id="section-5.3-2.2">
+            <p id="section-5.3-2.2.1">If the certificate policies extension is not present, set the <code>valid_policy_graph</code> to NULL.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt>(f)</dt>
+<dd id="section-5.3-2.3">
+            <p id="section-5.3-2.3.1">Verify that either <code>explicit_policy</code> is greater than 0 or the <code>valid_policy_graph</code> is not equal to NULL;<a href="#section-5.3-2.3.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="updates-to-section-614">
+<section id="section-5.4">
+        <h3 id="name-updates-to-section-614">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-updates-to-section-614" class="section-name selfRef">Updates to Section 6.1.4</a>
+        </h3>
+<p id="section-5.4-1">This update replaces step (b) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.4" class="relref">Section 6.1.4</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> with the following text:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.4-2">
+<dt>(b)</dt>
+<dd id="section-5.4-2.1">
+            <p id="section-5.4-2.1.1">If a policy mappings extension is present, then for each issuerDomainPolicy ID-P in the policy mappings extension:<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.4-2.1.2">
+<dt>(1)</dt>
+<dd id="section-5.4-2.1.2.1">
+                <p id="section-5.4-2.1.2.1.1">If the policy_mapping variable is greater than 0 and there is a
+node in the <code>valid_policy_graph</code> of depth i where ID-P is the
+valid_policy, set <code>expected_policy_set</code> to the set of
+subjectDomainPolicy values that are specified as
+equivalent to ID-P by the policy mappings extension.<a href="#section-5.4-2.1.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(2)</dt>
+<dd id="section-5.4-2.1.2.2">
+                <p id="section-5.4-2.1.2.2.1">If the policy_mapping variable is greater than 0,
+no node of depth i in the <code>valid_policy_graph</code> has a
+<code>valid_policy</code> of ID-P, but there is a node of depth i with a
+<code>valid_policy</code> of anyPolicy, then generate a child node of
+the node of depth i-1 that has a <code>valid_policy</code> of anyPolicy
+as follows:<a href="#section-5.4-2.1.2.2.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.4-2.1.2.2.2">
+<dt>(i)</dt>
+<dd id="section-5.4-2.1.2.2.2.1">
+                    <p id="section-5.4-2.1.2.2.2.1.1">set the <code>valid_policy</code> to ID-P;<a href="#section-5.4-2.1.2.2.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+                  <dd class="break"></dd>
+<dt>(ii)</dt>
+<dd id="section-5.4-2.1.2.2.2.2">
+                    <p id="section-5.4-2.1.2.2.2.2.1">set the <code>qualifier_set</code> to the qualifier set of the
+policy anyPolicy in the certificate policies
+extension of certificate i; and<a href="#section-5.4-2.1.2.2.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+                  <dd class="break"></dd>
+<dt>(iii)</dt>
+<dd id="section-5.4-2.1.2.2.2.3">
+                    <p id="section-5.4-2.1.2.2.2.3.1">set the <code>expected_policy_set</code> to the set of
+subjectDomainPolicy values that are specified as
+equivalent to ID-P by the policy mappings extension.<a href="#section-5.4-2.1.2.2.2.3.1" class="pilcrow">¶</a></p>
+</dd>
+                <dd class="break"></dd>
+</dl>
+</dd>
+              <dd class="break"></dd>
+<dt>(3)</dt>
+<dd id="section-5.4-2.1.2.3">
+                <p id="section-5.4-2.1.2.3.1">If the <code>policy_mapping</code> variable is equal to 0:<a href="#section-5.4-2.1.2.3.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.4-2.1.2.3.2">
+<dt>(i)</dt>
+<dd id="section-5.4-2.1.2.3.2.1">
+                    <p id="section-5.4-2.1.2.3.2.1.1">delete the node, if any, of depth i in the <code>valid_policy_graph</code> where ID-P is the <code>valid_policy</code>.<a href="#section-5.4-2.1.2.3.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+                  <dd class="break"></dd>
+<dt>(ii)</dt>
+<dd id="section-5.4-2.1.2.3.2.2">
+                    <p id="section-5.4-2.1.2.3.2.2.1">If there is a node in the <code>valid_policy_graph</code> of depth
+i-1 or less without any child nodes, delete that
+node.  Repeat this step until there are no nodes of
+depth i-1 or less without children.<a href="#section-5.4-2.1.2.3.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+                <dd class="break"></dd>
+</dl>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="updates-to-section-615">
+<section id="section-5.5">
+        <h3 id="name-updates-to-section-615">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-updates-to-section-615" class="section-name selfRef">Updates to Section 6.1.5</a>
+        </h3>
+<p id="section-5.5-1">This update replaces step (g) of <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.5" class="relref">Section 6.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> with the following text:<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.5-2">
+<dt>(g)</dt>
+<dd id="section-5.5-2.1">
+            <p id="section-5.5-2.1.1">Calculate the <code>user_constrained_policy_set</code> as follows.
+The <code>user_constrained_policy_set</code> is a set of policy OIDs, along with associated policy qualifiers.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.5-2.1.2">
+<dt>(1)</dt>
+<dd id="section-5.5-2.1.2.1">
+                <p id="section-5.5-2.1.2.1.1">If the <code>valid_policy_graph</code> is NULL, set <code>valid_policy_node_set</code> to the empty set.<a href="#section-5.5-2.1.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(2)</dt>
+<dd id="section-5.5-2.1.2.2">
+                <p id="section-5.5-2.1.2.2.1">If the <code>valid_policy_graph</code> is not NULL, set <code>valid_policy_node_set</code> to the set of policy nodes
+whose <code>valid_policy</code> is not anyPolicy and
+whose parent list is a single node with <code>valid_policy</code> of anyPolicy.<a href="#section-5.5-2.1.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(3)</dt>
+<dd id="section-5.5-2.1.2.3">
+                <p id="section-5.5-2.1.2.3.1">If the <code>valid_policy_graph</code> is not NULL and contains a node of depth n with the <code>valid_policy</code> anyPolicy, add it to <code>valid_policy_node_set</code>.<a href="#section-5.5-2.1.2.3.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(4)</dt>
+<dd id="section-5.5-2.1.2.4">
+                <p id="section-5.5-2.1.2.4.1">Compute <code>authority_constrained_policy_set</code>, a set of policy OIDs and associated qualifiers as follows. For each node in <code>valid_policy_node_set</code>:<a href="#section-5.5-2.1.2.4.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.5-2.1.2.4.2">
+<dt>(i)</dt>
+<dd id="section-5.5-2.1.2.4.2.1">
+                    <p id="section-5.5-2.1.2.4.2.1.1">Add the node's <code>valid_policy</code> to <code>authority_constrained_policy_set</code>.<a href="#section-5.5-2.1.2.4.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+                  <dd class="break"></dd>
+<dt>(ii)</dt>
+<dd id="section-5.5-2.1.2.4.2.2">
+                    <p id="section-5.5-2.1.2.4.2.2.1">Collect all qualifiers in the node, its ancestors, and descendants and associate them with <code>valid_policy</code>. Applications that do not use policy qualifiers MAY skip this step to simplify processing.<a href="#section-5.5-2.1.2.4.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+                <dd class="break"></dd>
+</dl>
+</dd>
+              <dd class="break"></dd>
+<dt>(5)</dt>
+<dd id="section-5.5-2.1.2.5">
+                <p id="section-5.5-2.1.2.5.1">Set <code>user_constrained_policy_set</code> to <code>authority_constrained_policy_set</code>.<a href="#section-5.5-2.1.2.5.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt>(6)</dt>
+<dd id="section-5.5-2.1.2.6">
+                <p id="section-5.5-2.1.2.6.1">If the user-initial-policy-set is not anyPolicy:<a href="#section-5.5-2.1.2.6.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="olPercent" id="section-5.5-2.1.2.6.2">
+<dt>(i)</dt>
+<dd id="section-5.5-2.1.2.6.2.1">
+                    <p id="section-5.5-2.1.2.6.2.1.1">Remove any elements of <code>user_constrained_policy_set</code> which do not appear in user-initial-policy-set.<a href="#section-5.5-2.1.2.6.2.1.1" class="pilcrow">¶</a></p>
+</dd>
+                  <dd class="break"></dd>
+<dt>(ii)</dt>
+<dd id="section-5.5-2.1.2.6.2.2">
+                    <p id="section-5.5-2.1.2.6.2.2.1">If anyPolicy appears in <code>authority_constrained_policy_set</code> with qualifiers AP-Q, for each OID P-OID in user-initial-policy-set which does not appear in <code>user_constrained_policy_set</code>, add P-OID with qualifiers AP-Q to <code>user_constrained_policy_set</code>.<a href="#section-5.5-2.1.2.6.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+                <dd class="break"></dd>
+</dl>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.5-3">Additionally, this update replaces the final paragraph as follows:<a href="#section-5.5-3" class="pilcrow">¶</a></p>
+<p id="section-5.5-4">OLD:<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.5-5.1">
+            <p id="section-5.5-5.1.1">If either (1) the value of <code>explicit_policy</code> variable is greater than
+zero or (2) the <code>valid_policy_tree</code> is not NULL, then path processing
+has succeeded.<a href="#section-5.5-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.5-6">NEW:<a href="#section-5.5-6" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.5-7.1">
+            <p id="section-5.5-7.1.1">If either (1) the value of <code>explicit_policy</code> variable is greater than
+zero or (2) the <code>user_constrained_policy_set</code> is not empty, then path processing
+has succeeded.<a href="#section-5.5-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="update-outputs">
+<section id="section-5.6">
+        <h3 id="name-updates-to-section-616">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-updates-to-section-616" class="section-name selfRef">Updates to Section 6.1.6</a>
+        </h3>
+<p id="section-5.6-1">This update replaces <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.6" class="relref">Section 6.1.6</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> with the following text:<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5.6-2.1">
+            <p id="section-5.6-2.1.1">If path processing succeeds, the procedure terminates, returning a
+success indication together with final value of the <code>user_constrained_policy_set</code>,
+the <code>working_public_key</code>, the <code>working_public_key_algorithm</code>, and the
+<code>working_public_key_parameters</code>.<a href="#section-5.6-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2.1.2">Note the original procedure described in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> included a
+<code>valid_policy_tree</code> structure as part of the output. This structure grows
+exponentially in the size of the input, so computing it risks
+denial-of-service vulernabilities in X.509-based applications, such as
+<span>[<a href="#CVE-2023-0464" class="cite xref">CVE-2023-0464</a>]</span> and <span>[<a href="#CVE-2023-23524" class="cite xref">CVE-2023-23524</a>]</span>. Accordingly, this output is
+deprecated. Computing this structure is NOT RECOMMENDED.<a href="#section-5.6-2.1.2" class="pilcrow">¶</a></p>
+<p id="section-5.6-2.1.3">An implementation which requires <code>valid_policy_tree</code> for compatibility with
+legacy systems may compute it from <code>valid_policy_graph</code> by recursively
+duplicating every multi-parent node. This may be done on-demand when the
+calling application first requests this output. However, this computation may
+consume exponential time and memory, so such implementations SHOULD mitigate
+denial-of-service in other ways, such as limiting the depth or size of the
+tree.<a href="#section-5.6-2.1.3" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="other-mitigations">
+<section id="section-6">
+      <h2 id="name-other-mitigations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-other-mitigations" class="section-name selfRef">Other Mitigations</a>
+      </h2>
+<p id="section-6-1">X.509 implementations that are unable switch to the policy graph structure
+SHOULD mitigate the denial-of-service attack in other ways. This section
+describes alternate mitigation and partial mitigation strategies.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="limit-certificate-depth">
+<section id="section-6.1">
+        <h3 id="name-limit-certificate-depth">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-limit-certificate-depth" class="section-name selfRef">Limit Certificate Depth</a>
+        </h3>
+<p id="section-6.1-1">X.509 validators typically already allow limiting the depth of a certificate
+chain. This can limit the attack, however a large depth limit may still admit
+attacks. By modifying the example in <a href="#exponential-growth" class="auto internal xref">Section 3.2</a> to increase the
+number of policies asserted in each certificate, an attacker could still achieve
+O(N^(depth/2)) scaling or higher.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="limit-policy-tree-size">
+<section id="section-6.2">
+        <h3 id="name-limit-policy-tree-size">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-limit-policy-tree-size" class="section-name selfRef">Limit Policy Tree Size</a>
+        </h3>
+<p id="section-6.2-1">If existing stable interfaces force the validator to build a full policy tree
+(see <a href="#outputs" class="auto internal xref">Section 4.2</a>), the validator SHOULD limit the number of nodes in the policy
+tree, and reject the certification path if this limit is reached.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="inhibit-policy-mapping">
+<section id="section-6.3">
+        <h3 id="name-inhibit-policy-mapping">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-inhibit-policy-mapping" class="section-name selfRef">Inhibit Policy Mapping</a>
+        </h3>
+<p id="section-6.3-1">If policy mapping is disabled via the initial-policy-mapping-inhibit setting
+(see <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.1" class="relref">Section 6.1.1</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), the attack is mitigated. This also
+significantly simplifies the X.509 implementation, which reduces the risk of
+other security bugs. However, this will break compatibility with any existing
+certification paths which rely on policy mapping.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">To facilitate this mitigation, certificate authorities SHOULD NOT issue
+certificates with the policy mappings extension (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.5" class="relref">Section 4.2.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>). Applications maintaining policies for accepted trust anchors are
+RECOMMENDED to forbid this extension in participating certificate authorities.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="disable-policy-checking">
+<section id="section-6.4">
+        <h3 id="name-disable-policy-checking">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-disable-policy-checking" class="section-name selfRef">Disable Policy Checking</a>
+        </h3>
+<p id="section-6.4-1">An X.509 validator can mitigate this attack by disabling policy validation
+entirely. This may be viable for applications which do not require policy
+validation. In this case, critical policy-related extensions, notably the policy
+constraints (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.11" class="relref">Section 4.2.1.11</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), MUST be treated as unrecognized
+extensions as in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2" class="relref">Section 4.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> and be rejected.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="verify-signatures-first">
+<section id="section-6.5">
+        <h3 id="name-verify-signatures-first">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-verify-signatures-first" class="section-name selfRef">Verify Signatures First</a>
+        </h3>
+<p id="section-6.5-1">X.509 validators SHOULD verify signatures in certification paths before or in
+conjunction with policy verification. This limits the attack to entities in
+control of CA certificates. For some applications, this may be sufficient to
+mitigate the attack. However, other applications may still be impacted. For
+example:<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.5-2.1">
+            <p id="section-6.5-2.1.1">Any application that evaluates an untrusted PKI, such as a hosting provider
+that evaluates a customer-supplied PKI<a href="#section-6.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.5-2.2">
+            <p id="section-6.5-2.2.1">Any application that evaluates an otherwise trusted PKI, but where untrusted
+entities have technically-constrained intermediate certificates where policy
+mapping and path length are unconstrained.<a href="#section-6.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1"><a href="#dos" class="auto internal xref">Section 3</a> discusses how <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>'s policy tree algorithm can lead to
+denial-of-service vulnerabilities in X.509-based applications, such as
+<span>[<a href="#CVE-2023-0464" class="cite xref">CVE-2023-0464</a>]</span> and <span>[<a href="#CVE-2023-23524" class="cite xref">CVE-2023-23524</a>]</span>.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2"><a href="#updates" class="auto internal xref">Section 5</a> replaces this algorithm to avoid this issue. As discussed in
+<a href="#policy-graph" class="auto internal xref">Section 4.1</a>, the new structure scales linearly with the input. This means
+input limits in X.509 validators will more naturally bound processing time,
+thus avoiding these vulnerabilities.<a href="#section-7-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-8">
+      <h2 id="name-iana-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-8-1">This document has no IANA actions.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="CVE-2023-0464">[CVE-2023-0464]</dt>
+        <dd>
+<span class="refTitle">"Excessive Resource Usage Verifying X.509 Policy Constraints"</span>, <time datetime="2023-03" class="refDate">March 2023</time>, <span>&lt;<a href="https://www.cve.org/CVERecord?id=CVE-2023-0464">https://www.cve.org/CVERecord?id=CVE-2023-0464</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CVE-2023-23524">[CVE-2023-23524]</dt>
+        <dd>
+<span class="refTitle">"Processing a maliciously crafted certificate may lead to a denial-of-service"</span>, <time datetime="2023-02" class="refDate">February 2023</time>, <span>&lt;<a href="https://www.cve.org/CVERecord?id=CVE-2023-23524">https://www.cve.org/CVERecord?id=CVE-2023-23524</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8446">[RFC8446]</dt>
+        <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="X.509">[X.509]</dt>
+      <dd>
+<span class="refAuthor">International Telecommunications Union</span>, <span class="refTitle">"Information technology - Open Systems Interconnection - The Directory: Public-key and attribute certificate frameworks"</span>, <span class="seriesInfo">ITU-T Recommendation X.509</span>, <time datetime="2019-10" class="refDate">October 2019</time>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+<div id="acknowledgements">
+<section id="appendix-A">
+      <h2 id="name-acknowledgements">
+<a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-A-1">The author thanks Bob Beck, Adam Langley, Matt Mueller, and Ryan Sleevi for
+many valuable discussions that led to discovering this issue, understanding it,
+and developing the mitigation.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">David Benjamin</span></div>
+<div dir="auto" class="left"><span class="org">Google LLC</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:davidben@google.com" class="email">davidben@google.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
