@@ -691,9 +691,10 @@ ertificate, an attacker could still achieve O(N^(depth/2)) scaling.
 
 ## Limit Policy Tree Size
 
-If existing stable interfaces force the validator to build a full policy tree
-(see {{outputs}}), the validator SHOULD limit the number of nodes in the policy
-tree, and reject the certification path if this limit is reached.
+The attack can be mitigated by limiting the number of nodes in the policy tree,
+and rejecting the certification path if this limit is reached. This limit should
+be set high enough to still admit existing valid certification paths for the
+application, but low enough to no longer admit a DoS attack.
 
 ## Inhibit Policy Mapping
 
