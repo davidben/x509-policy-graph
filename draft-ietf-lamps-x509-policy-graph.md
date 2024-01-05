@@ -660,7 +660,7 @@ This update replaces {{Section 6.1.6 of RFC5280}} with the following text:
 > Note the original procedure described in {{RFC5280}} included a
 > `valid_policy_tree` structure as part of the output. This structure grows
 > exponentially in the size of the input, so computing it risks
-> denial-of-service vulernabilities in X.509-based applications, such as
+> denial-of-service vulnerabilities in X.509-based applications, such as
 > {{CVE-2023-0464}} and {{CVE-2023-23524}}. Accordingly, this output is
 > deprecated. Computing this structure is NOT RECOMMENDED.
 >
