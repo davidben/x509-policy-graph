@@ -200,15 +200,17 @@ attacker consumed to send it, preventing it from servicing other clients.
 
 # Avoiding Exponential Growth {#avoiding-exponential-growth}
 
-The denial-of-service vulnerability described in {{dos}} can be mitigated by implementing a policy graph structure, described in this section.
+This document mitigates the denial-of-service vulnerability described in {{dos}}
+by replacing the policy tree with a policy graph structure, described in this
+section. The policy graph grows linearly instead of exponentially. This removes
+the asymmetric cost in policy validation.
 
-Compared the original policy tree structure described in {{!RFC5280}}, the policy graph grows linearly instead of exponentially.
-This document deprecates the original policy tree structure.
-X.509 implementations SHOULD instead perform policy validation by building a policy graph.
-This mitigates the denial-of-service attack by removing the asymmetric cost in policy validation.
-
-While this replacement process computes the same policies as in {{!RFC5280}}, one of the outputs is in a different form.
-See {{outputs}} for details.
+X.509 implementations SHOULD perform policy validation by building a policy
+graph, following the procedure described in {{updates}}. This replacement
+procedure computes the same policies as in {{!RFC5280}}, however one of the
+outputs is in a different form. See {{outputs}} for details.
+{{other-mitigations}} describes alternative mitigations for implementations that
+depend on the original, exponential-sized output.
 
 ## Policy Graphs {#policy-graph}
 
