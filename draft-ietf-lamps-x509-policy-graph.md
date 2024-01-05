@@ -680,11 +680,14 @@ describes alternate mitigation and partial mitigation strategies.
 
 ## Limit Certificate Depth
 
-X.509 validators typically already allow limiting the depth of a certificate
-chain. This can limit the attack, however a large depth limit may still admit
-attacks. By modifying the example in {{exponential-growth}} to increase the
-number of policies asserted in each certificate, an attacker could still achieve
-O(N^(depth/2)) scaling or higher.
+The policy tree grows exponentially in the depth of a certification path, so
+limiting the depth and certificate size can mitigate the attack.
+
+However, this option may not be viable for all applications. Too low of a limit
+may reject existing paths which the application wishes to accept. Too high of a
+limit may still admit a DoS attack for the application. By modifying the example
+in {{exponential-growth}} to increase the number of policies asserted in each
+ertificate, an attacker could still achieve O(N^(depth/2)) scaling.
 
 ## Limit Policy Tree Size
 
