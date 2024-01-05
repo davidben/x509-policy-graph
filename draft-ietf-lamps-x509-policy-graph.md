@@ -107,28 +107,30 @@ For example, suppose a certification path contains:
 
 * An end-entity certificate which asserts policy OIDs OID2, OID3, and OID6.
 
-This would result in the tree shown in {{basic-tree}}.
+This would result in the tree shown in {{basic-tree}}. Note that OID5 and OID6
+are not included or mapped across the whole path, so they do not appear in the
+final structure.
 
 ~~~ ascii-art
-                         +-----------+
-        Root:            | anyPolicy |
-                         +-----------+
-                         |{anyPolicy}|
-                         +-----------+
-                          /          \
-                         /            \
-                        v              v
-               +------------+      +------------+
-Intermediate:  |    OID1    |      |    OID2    |
-               +------------+      +------------+
-               |{OID3, OID4}|      |   {OID2}   |
-               +------------+      +------------+
-                     |                   |
-                     |                   |
-                     v                   v
-               +------------+      +------------+
-  End-entity:  |    OID3    |      |    OID2    |
-               +------------+      +------------+
+                            +-----------+
+           Root:            | anyPolicy |
+                            +-----------+
+                            |{anyPolicy}|
+                            +-----------+
+                             /          \
+                            /            \
+                           v              v
+                  +------------+      +------------+
+   Intermediate:  |    OID1    |      |    OID2    |
+(OID5 discarded)  +------------+      +------------+
+                  |{OID3, OID4}|      |   {OID2}   |
+                  +------------+      +------------+
+                        |                   |
+                        |                   |
+                        v                   v
+                  +------------+      +------------+
+     End-entity:  |    OID3    |      |    OID2    |
+(OID6 discarded)  +------------+      +------------+
 ~~~
 {: #basic-tree title="An Example X.509 Policy Tree"}
 
