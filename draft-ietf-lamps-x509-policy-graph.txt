@@ -4,9 +4,9 @@
 
 Limited Additional Mechanisms for PKIX and SMIME             D. Benjamin
 Internet-Draft                                                Google LLC
-Updates: 5280 (if approved)                             27 November 2023
+Updates: 5280 (if approved)                               5 January 2024
 Intended status: Standards Track                                        
-Expires: 30 May 2024
+Expires: 8 July 2024
 
 
                    Updates to X.509 Policy Validation
@@ -47,11 +47,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 May 2024.
+   This Internet-Draft will expire on 8 July 2024.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -156,27 +156,29 @@ Table of Contents
    *  An end-entity certificate which asserts policy OIDs OID2, OID3,
       and OID6.
 
-   This would result in the tree shown in Figure 1.
+   This would result in the tree shown in Figure 1.  Note that OID5 and
+   OID6 are not included or mapped across the whole path, so they do not
+   appear in the final structure.
 
-                            +-----------+
-           Root:            | anyPolicy |
-                            +-----------+
-                            |{anyPolicy}|
-                            +-----------+
-                             /          \
-                            /            \
-                           v              v
-                  +------------+      +------------+
-   Intermediate:  |    OID1    |      |    OID2    |
-                  +------------+      +------------+
-                  |{OID3, OID4}|      |   {OID2}   |
-                  +------------+      +------------+
-                        |                   |
-                        |                   |
-                        v                   v
-                  +------------+      +------------+
-     End-entity:  |    OID3    |      |    OID2    |
-                  +------------+      +------------+
+                               +-----------+
+              Root:            | anyPolicy |
+                               +-----------+
+                               |{anyPolicy}|
+                               +-----------+
+                                /          \
+                               /            \
+                              v              v
+                     +------------+      +------------+
+      Intermediate:  |    OID1    |      |    OID2    |
+   (OID5 discarded)  +------------+      +------------+
+                     |{OID3, OID4}|      |   {OID2}   |
+                     +------------+      +------------+
+                           |                   |
+                           |                   |
+                           v                   v
+                     +------------+      +------------+
+        End-entity:  |    OID3    |      |    OID2    |
+   (OID6 discarded)  +------------+      +------------+
 
                    Figure 1: An Example X.509 Policy Tree
 
@@ -251,20 +253,19 @@ Table of Contents
 
 4.  Avoiding Exponential Growth
 
-   The denial-of-service vulnerability described in Section 3 can be
-   mitigated by implementing a policy graph structure, described in this
-   section.
+   This document mitigates the denial-of-service vulnerability described
+   in Section 3 by replacing the policy tree with a policy graph
+   structure, described in this section.  The policy graph grows
+   linearly instead of exponentially.  This removes the asymmetric cost
+   in policy validation.
 
-   Compared the original policy tree structure described in [RFC5280],
-   the policy graph grows linearly instead of exponentially.  This
-   document deprecates the original policy tree structure.  X.509
-   implementations SHOULD instead perform policy validation by building
-   a policy graph.  This mitigates the denial-of-service attack by
-   removing the asymmetric cost in policy validation.
-
-   While this replacement process computes the same policies as in
-   [RFC5280], one of the outputs is in a different form.  See
-   Section 4.2 for details.
+   X.509 implementations SHOULD perform policy validation by building a
+   policy graph, following the procedure described in Section 5.  This
+   replacement procedure computes the same policies as in [RFC5280],
+   however one of the outputs is in a different form.  See Section 4.2
+   for details.  Section 6 describes alternative mitigations for
+   implementations that depend on the original, exponential-sized
+   output.
 
 4.1.  Policy Graphs
 
@@ -762,7 +763,7 @@ Table of Contents
       Note the original procedure described in [RFC5280] included a
       valid_policy_tree structure as part of the output.  This structure
       grows exponentially in the size of the input, so computing it
-      risks denial-of-service vulernabilities in X.509-based
+      risks denial-of-service vulnerabilities in X.509-based
       applications, such as [CVE-2023-0464] and [CVE-2023-23524].
       Accordingly, this output is deprecated.  Computing this structure
       is NOT RECOMMENDED.
@@ -785,19 +786,24 @@ Table of Contents
 
 6.1.  Limit Certificate Depth
 
-   X.509 validators typically already allow limiting the depth of a
-   certificate chain.  This can limit the attack, however a large depth
-   limit may still admit attacks.  By modifying the example in
-   Section 3.2 to increase the number of policies asserted in each
-   certificate, an attacker could still achieve O(N^(depth/2)) scaling
-   or higher.
+   The policy tree grows exponentially in the depth of a certification
+   path, so limiting the depth and certificate size can mitigate the
+   attack.
+
+   However, this option may not be viable for all applications.  Too low
+   of a limit may reject existing paths which the application wishes to
+   accept.  Too high of a limit may still admit a DoS attack for the
+   application.  By modifying the example in Section 3.2 to increase the
+   number of policies asserted in each ertificate, an attacker could
+   still achieve O(N^(depth/2)) scaling.
 
 6.2.  Limit Policy Tree Size
 
-   If existing stable interfaces force the validator to build a full
-   policy tree (see Section 4.2), the validator SHOULD limit the number
-   of nodes in the policy tree, and reject the certification path if
-   this limit is reached.
+   The attack can be mitigated by limiting the number of nodes in the
+   policy tree, and rejecting the certification path if this limit is
+   reached.  This limit should be set high enough to still admit
+   existing valid certification paths for the application, but low
+   enough to no longer admit a DoS attack.
 
 6.3.  Inhibit Policy Mapping
 
