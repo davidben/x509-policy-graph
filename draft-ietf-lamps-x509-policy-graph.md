@@ -111,7 +111,7 @@ This would result in the tree shown in {{basic-tree}}. Note that OID5 and OID6
 are not included or mapped across the whole path, so they do not appear in the
 final structure.
 
-~~~ ascii-art
+~~~ aasvg
                             +-----------+
            Root:            | anyPolicy |
                             +-----------+
@@ -158,7 +158,7 @@ mappings:
 At each depth, the tree would double in size.
 For example, if there are two intermediate certificates and one end-entity certificate, the resulting tree would be as depicted in {{exponential-tree}}.
 
-~~~ ascii-art
+~~~ aasvg
                         +-----------------------+
                         |        anyPolicy      |
                         +-----------------------+
@@ -225,7 +225,7 @@ Where {{!RFC5280}} adds multiple duplicate nodes, a policy graph adds a single n
 See {{updates}} for the procedure for building this structure.
 {{exponential-tree-as-graph}} shows the updated representation of the example in {{exponential-tree}}.
 
-~~~ ascii-art
+~~~ aasvg
               +-----------+
               | anyPolicy |
               +-----------+
@@ -382,7 +382,7 @@ This update replaces entry (a) of {{Section 6.1.2 of RFC5280}} with the followin
    `valid_policy_graph`.  Additional figures will use this format to
    describe changes in the `valid_policy_graph` during path processing.
 
-   ~~~ ascii-art
+   ~~~ aasvg
        +----------------+
        |   anyPolicy    |   <---- valid_policy
        +----------------+
@@ -420,7 +420,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
          This rule will generate a child node of depth i for the Gold policy.
          The result is shown as {{exact-match}}.
 
-         ~~~ ascii-art
+         ~~~ aasvg
              +-----------------+      +-----------------+
              |       Red       |      |       Blue      |
              +-----------------+      +-----------------+
@@ -457,7 +457,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
          generate two child nodes of depth i, one for each
          policy.  The result is shown as {{unmatched-anypolicy}}.
 
-         ~~~ ascii-art
+         ~~~ aasvg
                            +-----------------+
                            |    anyPolicy    |
                            +-----------------+
@@ -468,7 +468,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
                               /           \
                              /             \
                             /               \
-                           /                 \
+                           v                 v
              +-----------------+          +-----------------+
              |      Gold       |          |     Silver      |
              +-----------------+          +-----------------+
@@ -495,7 +495,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
       This rule will generate two child nodes of depth i, one for each policy.
       The result is shown below as {{anypolicy-in-extension}}.
 
-      ~~~ ascii-art
+      ~~~ aasvg
           +-----------------+   +-----------------+
           |       Red       |   |       Blue      |
           +-----------------+   +-----------------+
@@ -528,7 +528,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
       Applying this rule to the resulting graph will cause the nodes at depth i-2 that is marked with a 'Y' to be deleted.
       In the resulting graph, there are no nodes of depth i-1 or less without children, and this step is complete.
 
-      ~~~ ascii-art
+      ~~~ aasvg
                         +-----------+
                         |           | depth i-3
                         +-----------+
