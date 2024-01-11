@@ -343,7 +343,7 @@ This update replaces entry (a) of {{Section 6.1.2 of RFC5280}} with the followin
    one or more expected policy values.
 
    Nodes in the graph can be divided into depths, numbered starting from zero.
-   A node at depth x can have zero or more children at depth x+1, with the
+   A node at depth x can have zero or more children at depth x+1 and, with the
    exception of depth zero, one or more parents at depth x-1. No other edges
    between nodes may exist.
 
