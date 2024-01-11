@@ -4,9 +4,9 @@
 
 Limited Additional Mechanisms for PKIX and SMIME             D. Benjamin
 Internet-Draft                                                Google LLC
-Updates: 5280 (if approved)                               5 January 2024
+Updates: 5280 (if approved)                              11 January 2024
 Intended status: Standards Track                                        
-Expires: 8 July 2024
+Expires: 14 July 2024
 
 
                    Updates to X.509 Policy Validation
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 July 2024.
+   This Internet-Draft will expire on 14 July 2024.
 
 Copyright Notice
 
@@ -402,8 +402,8 @@ Table of Contents
 
         Nodes in the graph can be divided into depths, numbered starting
         from zero.  A node at depth x can have zero or more children at
-        depth x+1, with the exception of depth zero, one or more parents
-        at depth x-1.  No other edges between nodes may exist.
+        depth x+1 and, with the exception of depth zero, one or more
+        parents at depth x-1.  No other edges between nodes may exist.
 
         If the node is at depth x, the components of the node have the
         following semantics:
