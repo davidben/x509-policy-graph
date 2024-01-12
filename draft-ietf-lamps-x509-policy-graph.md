@@ -44,6 +44,16 @@ informative:
     target: https://www.cve.org/CVERecord?id=CVE-2023-23524
     date: February 2023
 
+  BoringSSL:
+    title: BoringSSL
+    target: https://boringssl.googlesource.com/boringssl
+    date: January 2024
+
+  LibreSSL:
+    title: LibreSSL
+    target: https://www.libressl.org/
+    date: January 2024
+
 --- abstract
 
 This document updates RFC 5280 to replace the algorithm for X.509 policy
@@ -732,6 +742,35 @@ example:
   entities have technically-constrained intermediate certificates where policy
   mapping and path length are unconstrained.
 
+# Implementation Status
+{:removeinrfc="true"}
+
+This section records the status of known implementations of the
+protocol defined by this specification at the time of posting of
+this Internet-Draft, and is based on a proposal described in
+RFC 7942.  The description of implementations in this section is
+intended to assist the IETF in its decision processes in
+progressing drafts to RFCs.  Please note that the listing of any
+individual implementation here does not imply endorsement by the
+IETF.  Furthermore, no effort has been spent to verify the
+information presented here that was supplied by IETF contributors.
+This is not intended as, and must not be construed to be, a
+catalog of available implementations or their features.  Readers
+are advised to note that other implementations may exist.
+
+According to RFC 7942, "this will allow reviewers and working
+groups to assign due consideration to documents that have the
+benefit of running code, which may serve as evidence of valuable
+experimentation and feedback that have made the implemented
+protocols more mature.  It is up to the individual working groups
+to use this information as they see fit".
+
+The following projects adopted the concept outlined in this document:
+
+* {{BoringSSL}}
+
+* {{LibreSSL}}
+
 # Security Considerations
 
 {{dos}} discusses how {{!RFC5280}}'s policy tree algorithm can lead to
@@ -754,4 +793,5 @@ This document has no IANA actions.
 
 The author thanks Bob Beck, Adam Langley, Matt Mueller, and Ryan Sleevi for
 many valuable discussions that led to discovering this issue, understanding it,
-and developing the mitigation.
+and developing the mitigation. The author also thanks Martin Thomson and Job
+Snijders for feedback on this document.
