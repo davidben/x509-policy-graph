@@ -743,6 +743,7 @@ example:
   mapping and path length are unconstrained.
 
 # Implementation Status
+{:removeinrfc="true"}
 
 This section records the status of known implementations of the
 protocol defined by this specification at the time of posting of
