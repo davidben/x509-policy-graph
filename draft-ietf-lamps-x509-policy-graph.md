@@ -742,24 +742,8 @@ example:
   entities have technically-constrained intermediate certificates where policy
   mapping and path length are unconstrained.
 
-# Security Considerations
-
-{{dos}} discusses how {{!RFC5280}}'s policy tree algorithm can lead to
-denial-of-service vulnerabilities in X.509-based applications, such as
-{{CVE-2023-0464}} and {{CVE-2023-23524}}.
-
-{{updates}} replaces this algorithm to avoid this issue. As discussed in
-{{policy-graph}}, the new structure scales linearly with the input. This means
-input limits in X.509 validators will more naturally bound processing time,
-thus avoiding these vulnerabilities.
-
-# IANA Considerations
-
-This document has no IANA actions.
-
---- back
-
 # Implementation Status
+
 This section records the status of known implementations of the
 protocol defined by this specification at the time of posting of
 this Internet-Draft, and is based on a proposal described in
@@ -785,6 +769,23 @@ The following projects adopted the concept outlined in this document:
 * {{BoringSSL}}
 
 * {{LibreSSL}}
+
+# Security Considerations
+
+{{dos}} discusses how {{!RFC5280}}'s policy tree algorithm can lead to
+denial-of-service vulnerabilities in X.509-based applications, such as
+{{CVE-2023-0464}} and {{CVE-2023-23524}}.
+
+{{updates}} replaces this algorithm to avoid this issue. As discussed in
+{{policy-graph}}, the new structure scales linearly with the input. This means
+input limits in X.509 validators will more naturally bound processing time,
+thus avoiding these vulnerabilities.
+
+# IANA Considerations
+
+This document has no IANA actions.
+
+--- back
 
 # Acknowledgements
 {:numbered="false"}
