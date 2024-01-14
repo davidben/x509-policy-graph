@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-01-11T01:14:31.985877+00:00",
+  "timestamp": "2024-01-14T01:19:33.202968+00:00",
   "repo": "davidben/x509-policy-graph",
   "labels": [
     {
@@ -49,6 +49,246 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
-  "pulls": []
+  "issues": [
+    {
+      "number": 3,
+      "id": "I_kwDOJ4e6bs572Eqw",
+      "title": "Arrowheads on Figure 8",
+      "url": "https://github.com/davidben/x509-policy-graph/issues/3",
+      "state": "CLOSED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Do you want arrowheads on this diagram, to make it consistent with those preceding it?  I added arrows to one of the other diagrams in #1, but missed this one.",
+      "createdAt": "2024-01-11T23:30:02Z",
+      "updatedAt": "2024-01-12T16:52:29Z",
+      "closedAt": "2024-01-12T16:52:29Z",
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "body": "Sure, why not? The diagrams are all copied from RFC 5280 and adapted from there, inconsistent arrow heads and all, but may as well be consistent now.",
+          "createdAt": "2024-01-12T16:48:00Z",
+          "updatedAt": "2024-01-12T16:48:00Z"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOJ4e6bs578IcC",
+      "title": "Address MT's artart feedback",
+      "url": "https://github.com/davidben/x509-policy-graph/issues/5",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "davidben"
+      ],
+      "labels": [],
+      "body": "Filing this so I don't forget.\r\n\r\nSee https://mailarchive.ietf.org/arch/msg/spasm/hc6fCJmf6GWTukWgD49g1rnehpI/\r\n\r\n(CC @martinthomson)",
+      "createdAt": "2024-01-12T17:37:32Z",
+      "updatedAt": "2024-01-12T17:37:33Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOJ4e6bs5j3Zri",
+      "title": "SVG diagrams FTW",
+      "url": "https://github.com/davidben/x509-policy-graph/pull/1",
+      "state": "MERGED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-01-11T22:39:59Z",
+      "updatedAt": "2024-01-12T16:46:56Z",
+      "baseRepository": "davidben/x509-policy-graph",
+      "baseRefName": "main",
+      "baseRefOid": "89d55f4c89fd2d1882cafa803e3c56d0720d236a",
+      "headRepository": "martinthomson/x509-policy-graph",
+      "headRefName": "patch-1",
+      "headRefOid": "eb6bd168db1a2b06c8b88ccd2ee1668eb00d9de0",
+      "closedAt": "2024-01-11T23:00:51Z",
+      "mergedAt": "2024-01-11T23:00:51Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "bd0724e3258c22df50f4715132ba52b16c8a7920"
+      },
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I should probably have added a package.json to the repository too.  Otherwise, this will work in CI, but not locally (unless someone happens to have aasvg installed).  I'll let you manage that.",
+          "createdAt": "2024-01-11T23:22:09Z",
+          "updatedAt": "2024-01-11T23:22:09Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "body": "Ah, good idea. Added.",
+          "createdAt": "2024-01-12T16:46:55Z",
+          "updatedAt": "2024-01-12T16:46:55Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJ4e6bs5sTP6n",
+          "commit": {
+            "abbreviatedOid": "eb6bd16"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Whoah",
+          "createdAt": "2024-01-11T23:00:46Z",
+          "updatedAt": "2024-01-11T23:00:46Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOJ4e6bs5j3cP3",
+      "title": "and",
+      "url": "https://github.com/davidben/x509-policy-graph/pull/2",
+      "state": "MERGED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-01-11T22:51:48Z",
+      "updatedAt": "2024-01-11T22:55:44Z",
+      "baseRepository": "davidben/x509-policy-graph",
+      "baseRefName": "main",
+      "baseRefOid": "89d55f4c89fd2d1882cafa803e3c56d0720d236a",
+      "headRepository": "martinthomson/x509-policy-graph",
+      "headRefName": "patch-2",
+      "headRefOid": "5c33223d7f64e846c6dc423225fdd1e3113d9b6e",
+      "closedAt": "2024-01-11T22:55:44Z",
+      "mergedAt": "2024-01-11T22:55:44Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "ff567ccb006277ab1fd9f0b81404e9a55dbdcf83"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJ4e6bs5sTNs8",
+          "commit": {
+            "abbreviatedOid": "5c33223"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-01-11T22:55:14Z",
+          "updatedAt": "2024-01-11T22:55:14Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOJ4e6bs5j3rzp",
+      "title": "Add Implementation Status section",
+      "url": "https://github.com/davidben/x509-policy-graph/pull/4",
+      "state": "MERGED",
+      "author": "job",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Are any that you know of missing here?\r\n\r\nIf the section is complete you should cut a new version and upload it, this will help reviewers.",
+      "createdAt": "2024-01-12T00:15:25Z",
+      "updatedAt": "2024-01-12T17:36:58Z",
+      "baseRepository": "davidben/x509-policy-graph",
+      "baseRefName": "main",
+      "baseRefOid": "bd0724e3258c22df50f4715132ba52b16c8a7920",
+      "headRepository": "job/x509-policy-graph",
+      "headRefName": "main",
+      "headRefOid": "79a465518fb868d92fbeaa572e6c2379e6678d3d",
+      "closedAt": "2024-01-12T17:36:58Z",
+      "mergedAt": "2024-01-12T17:36:58Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "f89b78b7b8fc29d3ae6b5928e842e4b02cffe4a1"
+      },
+      "comments": [
+        {
+          "author": "job",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@davidben i *thinkk* I added the sentence that should trigger removal at publication, but my familiarity with kramdown-rfc is limited :-)",
+          "createdAt": "2024-01-12T17:07:38Z",
+          "updatedAt": "2024-01-12T17:07:38Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "body": "> @davidben i thinkk I added the sentence that should trigger removal at publication, but my familiarity with kramdown-rfc is limited :-)\r\n\r\nNeat! I didn't even know that existed and figured you just had to write it in prose. But it seems to work.\r\n",
+          "createdAt": "2024-01-12T17:36:00Z",
+          "updatedAt": "2024-01-12T17:36:00Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJ4e6bs5sZsVO",
+          "commit": {
+            "abbreviatedOid": "230efc8"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "Thanks! Meant to put this together, but didn't end up having time this week.",
+          "createdAt": "2024-01-12T16:54:41Z",
+          "updatedAt": "2024-01-12T16:54:54Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Should this be earlier? https://datatracker.ietf.org/doc/html/rfc7942#section-2 says to put it just before Security Considerations. I assume we also should add a sentence asking the RFC editor to remove it later.",
+              "createdAt": "2024-01-12T16:54:41Z",
+              "updatedAt": "2024-01-12T16:54:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJ4e6bs5sZuzC",
+          "commit": {
+            "abbreviatedOid": "230efc8"
+          },
+          "author": "job",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-01-12T17:00:37Z",
+          "updatedAt": "2024-01-12T17:00:37Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "sure, done",
+              "createdAt": "2024-01-12T17:00:37Z",
+              "updatedAt": "2024-01-12T17:00:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJ4e6bs5sZ8z8",
+          "commit": {
+            "abbreviatedOid": "79a4655"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-01-12T17:36:19Z",
+          "updatedAt": "2024-01-12T17:36:19Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
 }
