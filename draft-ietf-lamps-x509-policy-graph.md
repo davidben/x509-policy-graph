@@ -65,12 +65,25 @@ implementations vulnerable to denial-of-service attacks.
 
 # Introduction
 
-{{!RFC5280}} defines a suite of extensions for specifying certificate policies,
-along with a mechanism for mapping policies between subject and issuer policy
-domains in cross-certificates. This mechanism, when evaluated according to the
-algorithm in {{!RFC5280, Section 6.1}} produces a policy tree, describing
-policies asserted by each certificate, and mappings between them. This tree can
-grow exponentially in the depth of the certification path. This cost asymmetry
+{{!RFC5280}} defines a suite of extensions for determining the "policies" which
+apply to a certification path. A policy is described by an object identifier
+(OID), and a set of optional qualifiers.
+
+Policy validation in {{RFC5280}} is complex. As an overview, the certificate
+policies extension ({{Section 4.2.1.4 of !RFC5280}}) describes the policies,
+with optional qualifiers, under which an individual certificate was issued,
+and the policy mappings extension ({{Section 4.2.1.5 of !RFC5280}}) allows
+cross-certificates to map policy OIDs between subject and issuer policy
+domains. Subject to these mappings and other extensions, the certification
+path's overall policy set is the intersection of policies asserted by each
+certificate in the path, collecting the corresponding qualifiers.
+
+The procedure in {{Section 6.1 of !RFC5280}} determines this set in the course
+of certification path validation. It does so by building a policy tree,
+containing policies asserted by each certificate and mappings between
+them. This tree can grow exponentially in the depth of the certification path,
+which means an attacker, with a small input, can cause a path validator to
+consume excessive memory and computational resources. This cost asymmetry
 can lead to a denial-of-service vulnerability in X.509-based applications, such
 as {{CVE-2023-0464}} and {{CVE-2023-23524}}.
 
@@ -112,8 +125,8 @@ certificate.
 
 For example, suppose a certification path contains:
 
-* An intermediate certificate which asserts policy object identifiers (OIDs)
-  OID1, OID2, and OID5. It contains mappings OID1 to OID3, and OID1 to OID4.
+* An intermediate certificate which asserts policy OIDs OID1, OID2, and OID5.
+  It contains mappings OID1 to OID3, and OID1 to OID4.
 
 * An end-entity certificate which asserts policy OIDs OID2, OID3, and OID6.
 
