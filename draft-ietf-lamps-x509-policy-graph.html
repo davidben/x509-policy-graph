@@ -1032,7 +1032,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Benjamin</td>
-<td class="center">Expires 15 July 2024</td>
+<td class="center">Expires 20 July 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1048,12 +1048,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <a href="https://www.rfc-editor.org/rfc/rfc5280" class="eref">5280</a> (if approved)</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-01-12" class="published">12 January 2024</time>
+<time datetime="2024-01-17" class="published">17 January 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-07-15">15 July 2024</time></dd>
+<dd class="expires"><time datetime="2024-07-20">20 July 2024</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1101,7 +1101,7 @@ implementations vulnerable to denial-of-service attacks.<a href="#section-abstra
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 15 July 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 July 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1244,19 +1244,30 @@ implementations vulnerable to denial-of-service attacks.<a href="#section-abstra
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1"><span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> defines a suite of extensions for specifying certificate policies,
-along with a mechanism for mapping policies between subject and issuer policy
-domains in cross-certificates. This mechanism, when evaluated according to the
-algorithm in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>], <a href="https://rfc-editor.org/rfc/rfc5280#section-6.1" class="relref">Section 6.1</a></span> produces a policy tree, describing
-policies asserted by each certificate, and mappings between them. This tree can
-grow exponentially in the depth of the certification path. This cost asymmetry
+<p id="section-1-1"><span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> defines a suite of extensions for determining the "policies" which
+apply to a certification path. A policy is described by an object identifier
+(OID), and a set of optional qualifiers.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Policy validation in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> is complex. As an overview, the certificate
+policies extension (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.4" class="relref">Section 4.2.1.4</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>) describes the policies,
+with optional qualifiers, under which an individual certificate was issued.
+The policy mappings extension (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.5" class="relref">Section 4.2.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>) allows a
+CA certificate to map its policy OIDs to other policy OIDs in certificates
+that it issues. Subject to these mappings and other extensions, the certification
+path's overall policy set is the intersection of policies asserted by each
+certificate in the path, collecting the corresponding qualifiers.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">The procedure in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> determines this set in the course
+of certification path validation. It does so by building a policy tree,
+containing policies asserted by each certificate and mappings between
+them. This tree can grow exponentially in the depth of the certification path,
+which means an attacker, with a small input, can cause a path validator to
+consume excessive memory and computational resources. This cost asymmetry
 can lead to a denial-of-service vulnerability in X.509-based applications, such
-as <span>[<a href="#CVE-2023-0464" class="cite xref">CVE-2023-0464</a>]</span> and <span>[<a href="#CVE-2023-23524" class="cite xref">CVE-2023-23524</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2"><a href="#dos" class="auto internal xref">Section 3</a> describes this vulnerability. <a href="#policy-graph" class="auto internal xref">Section 4.1</a> describes the primary
+as <span>[<a href="#CVE-2023-0464" class="cite xref">CVE-2023-0464</a>]</span> and <span>[<a href="#CVE-2023-23524" class="cite xref">CVE-2023-23524</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4"><a href="#dos" class="auto internal xref">Section 3</a> describes this vulnerability. <a href="#policy-graph" class="auto internal xref">Section 4.1</a> describes the primary
 mitigation for this vulnerability, a replacement for the policy tree structure.
 <a href="#updates" class="auto internal xref">Section 5</a> provides updates to <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> which implement this change.
 Finally, <a href="#other-mitigations" class="auto internal xref">Section 6</a> discusses alternative mitigation strategies for
-X.509 applications.<a href="#section-1-2" class="pilcrow">¶</a></p>
+X.509 applications.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <div id="summary-of-changes-from-rfc-5280">
 <section id="section-1.1">
         <h3 id="name-summary-of-changes-from-rfc">
@@ -1304,8 +1315,8 @@ certificate.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">For example, suppose a certification path contains:<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1-3.1">
-            <p id="section-3.1-3.1.1">An intermediate certificate which asserts policy object identifiers (OIDs)
-OID1, OID2, and OID5. It contains mappings OID1 to OID3, and OID1 to OID4.<a href="#section-3.1-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-3.1.1">An intermediate certificate which asserts policy OIDs OID1, OID2, and OID5.
+It contains mappings OID1 to OID3, and OID1 to OID4.<a href="#section-3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.1-3.2">
             <p id="section-3.1-3.2.1">An end-entity certificate which asserts policy OIDs OID2, OID3, and OID6.<a href="#section-3.1-3.2.1" class="pilcrow">¶</a></p>
