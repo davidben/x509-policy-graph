@@ -71,10 +71,10 @@ apply to a certification path. A policy is described by an object identifier
 
 Policy validation in {{RFC5280}} is complex. As an overview, the certificate
 policies extension ({{Section 4.2.1.4 of !RFC5280}}) describes the policies,
-with optional qualifiers, under which an individual certificate was issued,
-and the policy mappings extension ({{Section 4.2.1.5 of !RFC5280}}) allows
-cross-certificates to map policy OIDs between subject and issuer policy
-domains. Subject to these mappings and other extensions, the certification
+with optional qualifiers, under which an individual certificate was issued.
+The policy mappings extension ({{Section 4.2.1.5 of !RFC5280}}) allows a
+CA certificate to map its policy OIDs to other policy OIDs in certificates
+that it issues. Subject to these mappings and other extensions, the certification
 path's overall policy set is the intersection of policies asserted by each
 certificate in the path, collecting the corresponding qualifiers.
 
