@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-01-16T01:14:22.649502+00:00",
+  "timestamp": "2024-01-18T01:14:12.379958+00:00",
   "repo": "davidben/x509-policy-graph",
   "labels": [
     {
@@ -79,7 +79,7 @@
       "id": "I_kwDOJ4e6bs578IcC",
       "title": "Address MT's artart feedback",
       "url": "https://github.com/davidben/x509-policy-graph/issues/5",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "davidben",
       "authorAssociation": "OWNER",
       "assignees": [
@@ -88,8 +88,8 @@
       "labels": [],
       "body": "Filing this so I don't forget.\r\n\r\nSee https://mailarchive.ietf.org/arch/msg/spasm/hc6fCJmf6GWTukWgD49g1rnehpI/\r\n\r\n(CC @martinthomson)",
       "createdAt": "2024-01-12T17:37:32Z",
-      "updatedAt": "2024-01-12T17:37:33Z",
-      "closedAt": null,
+      "updatedAt": "2024-01-17T22:47:22Z",
+      "closedAt": "2024-01-17T22:47:22Z",
       "comments": []
     }
   ],
@@ -287,6 +287,83 @@
           "createdAt": "2024-01-12T17:36:19Z",
           "updatedAt": "2024-01-12T17:36:19Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOJ4e6bs5kWfvM",
+      "title": "Add a brief overview of policy validation",
+      "url": "https://github.com/davidben/x509-policy-graph/pull/6",
+      "state": "MERGED",
+      "author": "davidben",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Addressing feedback in\r\nhttps://mailarchive.ietf.org/arch/msg/spasm/hc6fCJmf6GWTukWgD49g1rnehpI/\r\n\r\nTrying to describe it in full would be a nightmare. (anyPolicy, inhibitAnyPolicy, requireExplicitPolicy, inhibitPolicyMapping, user-initial-policy-set, initial-policy-mapping-inhibit, initial-explicit-policy, initial-any-policy-inhibit, ...) Hopefully this helps readers get the gist of it.\r\n\r\nFixes #5.",
+      "createdAt": "2024-01-17T20:18:35Z",
+      "updatedAt": "2024-01-17T22:48:02Z",
+      "baseRepository": "davidben/x509-policy-graph",
+      "baseRefName": "main",
+      "baseRefOid": "f89b78b7b8fc29d3ae6b5928e842e4b02cffe4a1",
+      "headRepository": "davidben/x509-policy-graph",
+      "headRefName": "artart-mt",
+      "headRefOid": "4107365729cd7966c009be7c0ef5d6d31996406a",
+      "closedAt": "2024-01-17T22:47:21Z",
+      "mergedAt": "2024-01-17T22:47:21Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "66b1926c13750273ac0a610240464e7c6e848446"
+      },
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "body": "@martinthomson How does this look?",
+          "createdAt": "2024-01-17T20:18:47Z",
+          "updatedAt": "2024-01-17T20:18:47Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJ4e6bs5s-Lwq",
+          "commit": {
+            "abbreviatedOid": "bfb0080"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Much clearer.",
+          "createdAt": "2024-01-17T21:42:00Z",
+          "updatedAt": "2024-01-17T21:42:03Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "```suggestion\r\ncertificates to map policy OIDs between subject and issuer policy\r\n```\r\n\r\nNot sure that the qualifier (word, not policy) is helping.",
+              "createdAt": "2024-01-17T21:42:00Z",
+              "updatedAt": "2024-01-17T21:42:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJ4e6bs5s-lJb",
+          "commit": {
+            "abbreviatedOid": "bfb0080"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-01-17T22:44:22Z",
+          "updatedAt": "2024-01-17T22:44:22Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "I'm not sure where I got \"cross-certificates\" from instead of \"CA certificates\". Reading it without the qualifier, I think it may be misleading. But really the problem is the rest of sentence was _already_ misleading.\r\n\r\nSuppose it said:\r\n\r\n> ... allows certificates to map policy OIDs between subject and issuer policy domains\r\n\r\nThat reads, to me, as if the end-entity certificate is allowed to have this too. Suppose the CA has OID1, and the EE has OID2 but includes mappings (OID1 -> OID2). One might think, from reading that, that this checks out and we have an OID1 -> OID2 chain. But that would be off by one. The EE's OIDs match _first_. The mappings only apply to _subsequent_ certificates.\r\n\r\nBecause really the problem is that, although the fields are named subject and issuer, issuer actually refers to yourself and subject refers to the next one!\r\n\r\nPerhaps:\r\n\r\n> ... allows a CA certificate to map its policy OIDs to different policy OIDs in certificates that it issues\r\n\r\nAnd then we also drop the confusing \"policy domain\" terminology which, IIRC, shows up in the ITU spec but not the IETF spec.",
+              "createdAt": "2024-01-17T22:44:22Z",
+              "updatedAt": "2024-01-17T22:44:22Z"
+            }
+          ]
         }
       ]
     }
