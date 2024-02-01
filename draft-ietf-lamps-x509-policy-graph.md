@@ -513,7 +513,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
       This is equivalent to running step (1) above, as if the certificate policies extension contained a policy with OID P-OID and qualifier set AP-Q.
 
       For example, consider a `valid_policy_graph` with a node of depth i-1 where the `expected_policy_set` is {Gold, Silver},
-      and a second node of depth i-1 where the `expected_policy_set` is {Gold, Bronze}.
+      and a second node of depth i-1 where the `expected_policy_set` is {Gold}.
       Assume anyPolicy appears in the certificate policies extension of certificate i with policy qualifiers AP-Q, but Gold and Silver do not appear.
       This rule will generate two child nodes of depth i, one for each policy.
       The result is shown below as {{anypolicy-in-extension}}.
@@ -524,7 +524,7 @@ This update replaces steps (d), (e), and (f) of {{Section 6.1.3 of RFC5280}} wit
           +-----------------+   +-----------------+
           |       {}        |   |       {}        |   depth i-1
           +-----------------+   +-----------------+
-          |  {Gold, Silver} |   |  {Gold, Bronze} |
+          |  {Gold, Silver} |   |      {Gold}     |
           +-----------------+   +-----------------+
                   |         \            |
                   |          \           |
@@ -667,7 +667,7 @@ OLD:
 
 NEW:
 
-> If either (1) the value of `explicit_policy` variable is greater than
+> If either (1) the value of `explicit_policy` is greater than
 > zero or (2) the `user_constrained_policy_set` is not empty, then path processing
 > has succeeded.
 
@@ -710,7 +710,7 @@ However, this option may not be viable for all applications. Too low of a limit
 may reject existing paths which the application wishes to accept. Too high of a
 limit may still admit a DoS attack for the application. By modifying the example
 in {{exponential-growth}} to increase the number of policies asserted in each
-ertificate, an attacker could still achieve O(N^(depth/2)) scaling.
+certificate, an attacker could still achieve O(N^(depth/2)) scaling.
 
 ## Limit Policy Tree Size
 
