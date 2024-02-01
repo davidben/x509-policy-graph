@@ -12,11 +12,11 @@ validation with an equivalent, more efficient algorithm. The original algorithm
 built a structure which scaled exponentially in the worst case, leaving
 implementations vulnerable to denial-of-service attacks. 
     " name="description">
-<meta content="xml2rfc 3.19.0" name="generator">
+<meta content="xml2rfc 3.19.1" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-ietf-lamps-x509-policy-graph-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.19.0
+  xml2rfc 3.19.1
     Python 3.11.6
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
@@ -29,7 +29,7 @@ implementations vulnerable to denial-of-service attacks.
     requests 2.31.0
     setuptools 68.2.2
     six 1.16.0
-    wcwidth 0.2.12
+    wcwidth 0.2.13
 -->
 <link href="draft-ietf-lamps-x509-policy-graph.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1028,11 +1028,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Updates to X.509 Policy Validation</td>
-<td class="right">January 2024</td>
+<td class="right">February 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Benjamin</td>
-<td class="center">Expires 20 July 2024</td>
+<td class="center">Expires 4 August 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1048,12 +1048,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <a href="https://www.rfc-editor.org/rfc/rfc5280" class="eref">5280</a> (if approved)</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-01-17" class="published">17 January 2024</time>
+<time datetime="2024-02-01" class="published">1 February 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-07-20">20 July 2024</time></dd>
+<dd class="expires"><time datetime="2024-08-04">4 August 2024</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1101,7 +1101,7 @@ implementations vulnerable to denial-of-service attacks.<a href="#section-abstra
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 July 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 August 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1193,19 +1193,19 @@ implementations vulnerable to denial-of-service attacks.<a href="#section-abstra
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-other-mitigations" class="internal xref">Other Mitigations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-limit-certificate-depth" class="internal xref">Limit Certificate Depth</a></p>
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-verify-signatures-first" class="internal xref">Verify Signatures First</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-limit-policy-tree-size" class="internal xref">Limit Policy Tree Size</a></p>
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-limit-certificate-depth" class="internal xref">Limit Certificate Depth</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
-                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-inhibit-policy-mapping" class="internal xref">Inhibit Policy Mapping</a></p>
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-limit-policy-tree-size" class="internal xref">Limit Policy Tree Size</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
-                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-disable-policy-checking" class="internal xref">Disable Policy Checking</a></p>
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-inhibit-policy-mapping" class="internal xref">Inhibit Policy Mapping</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
-                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-verify-signatures-first" class="internal xref">Verify Signatures First</a></p>
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-disable-policy-checking" class="internal xref">Disable Policy Checking</a></p>
 </li>
             </ul>
 </li>
@@ -2043,7 +2043,7 @@ and set the parents to the nodes at depth i-1 where P-OID appears in <code>expec
 This is equivalent to running step (1) above, as if the certificate policies extension contained a policy with OID P-OID and qualifier set AP-Q.<a href="#section-5.3-2.1.2.2.3" class="pilcrow">¶</a></p>
 <p id="section-5.3-2.1.2.2.4">
 For example, consider a <code>valid_policy_graph</code> with a node of depth i-1 where the <code>expected_policy_set</code> is {Gold, Silver},
-and a second node of depth i-1 where the <code>expected_policy_set</code> is {Gold, Bronze}.
+and a second node of depth i-1 where the <code>expected_policy_set</code> is {Gold}.
 Assume anyPolicy appears in the certificate policies extension of certificate i with policy qualifiers AP-Q, but Gold and Silver do not appear.
 This rule will generate two child nodes of depth i, one for each policy.
 The result is shown below as <a href="#anypolicy-in-extension" class="auto internal xref">Figure 7</a>.<a href="#section-5.3-2.1.2.2.4" class="pilcrow">¶</a></p>
@@ -2091,8 +2091,7 @@ The result is shown below as <a href="#anypolicy-in-extension" class="auto inter
                           <text x="416" y="84">i-1</text>
                           <text x="52" y="116">{Gold,</text>
                           <text x="112" y="116">Silver}</text>
-                          <text x="228" y="116">{Gold,</text>
-                          <text x="288" y="116">Bronze}</text>
+                          <text x="260" y="116">{Gold}</text>
                           <text x="76" y="260">Silver</text>
                           <text x="260" y="260">Gold</text>
                           <text x="76" y="292">{AP-Q}</text>
@@ -2384,7 +2383,7 @@ has succeeded.<a href="#section-5.5-5.1.1" class="pilcrow">¶</a></p>
 <p id="section-5.5-6">NEW:<a href="#section-5.5-6" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="section-5.5-7.1">
-            <p id="section-5.5-7.1.1">If either (1) the value of <code>explicit_policy</code> variable is greater than
+            <p id="section-5.5-7.1.1">If either (1) the value of <code>explicit_policy</code> is greater than
 zero or (2) the <code>user_constrained_policy_set</code> is not empty, then path processing
 has succeeded.<a href="#section-5.5-7.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -2430,79 +2429,79 @@ tree.<a href="#section-5.6-2.1.3" class="pilcrow">¶</a></p>
 <p id="section-6-1">X.509 implementations that are unable switch to the policy graph structure
 SHOULD mitigate the denial-of-service attack in other ways. This section
 describes alternate mitigation and partial mitigation strategies.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="limit-certificate-depth">
-<section id="section-6.1">
-        <h3 id="name-limit-certificate-depth">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-limit-certificate-depth" class="section-name selfRef">Limit Certificate Depth</a>
-        </h3>
-<p id="section-6.1-1">The policy tree grows exponentially in the depth of a certification path, so
-limiting the depth and certificate size can mitigate the attack.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2">However, this option may not be viable for all applications. Too low of a limit
-may reject existing paths which the application wishes to accept. Too high of a
-limit may still admit a DoS attack for the application. By modifying the example
-in <a href="#exponential-growth" class="auto internal xref">Section 3.2</a> to increase the number of policies asserted in each
-ertificate, an attacker could still achieve O(N^(depth/2)) scaling.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="limit-policy-tree-size">
-<section id="section-6.2">
-        <h3 id="name-limit-policy-tree-size">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-limit-policy-tree-size" class="section-name selfRef">Limit Policy Tree Size</a>
-        </h3>
-<p id="section-6.2-1">The attack can be mitigated by limiting the number of nodes in the policy tree,
-and rejecting the certification path if this limit is reached. This limit should
-be set high enough to still admit existing valid certification paths for the
-application, but low enough to no longer admit a DoS attack.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="inhibit-policy-mapping">
-<section id="section-6.3">
-        <h3 id="name-inhibit-policy-mapping">
-<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-inhibit-policy-mapping" class="section-name selfRef">Inhibit Policy Mapping</a>
-        </h3>
-<p id="section-6.3-1">If policy mapping is disabled via the initial-policy-mapping-inhibit setting
-(see <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.1" class="relref">Section 6.1.1</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), the attack is mitigated. This also
-significantly simplifies the X.509 implementation, which reduces the risk of
-other security bugs. However, this will break compatibility with any existing
-certification paths which rely on policy mapping.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">To facilitate this mitigation, certificate authorities SHOULD NOT issue
-certificates with the policy mappings extension (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.5" class="relref">Section 4.2.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>). Applications maintaining policies for accepted trust anchors are
-RECOMMENDED to forbid this extension in participating certificate authorities.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="disable-policy-checking">
-<section id="section-6.4">
-        <h3 id="name-disable-policy-checking">
-<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-disable-policy-checking" class="section-name selfRef">Disable Policy Checking</a>
-        </h3>
-<p id="section-6.4-1">An X.509 validator can mitigate this attack by disabling policy validation
-entirely. This may be viable for applications which do not require policy
-validation. In this case, critical policy-related extensions, notably the policy
-constraints (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.11" class="relref">Section 4.2.1.11</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), MUST be treated as unrecognized
-extensions as in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2" class="relref">Section 4.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> and be rejected.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
-</section>
-</div>
 <div id="verify-signatures-first">
-<section id="section-6.5">
+<section id="section-6.1">
         <h3 id="name-verify-signatures-first">
-<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-verify-signatures-first" class="section-name selfRef">Verify Signatures First</a>
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-verify-signatures-first" class="section-name selfRef">Verify Signatures First</a>
         </h3>
-<p id="section-6.5-1">X.509 validators SHOULD verify signatures in certification paths before or in
+<p id="section-6.1-1">X.509 validators SHOULD verify signatures in certification paths before or in
 conjunction with policy verification. This limits the attack to entities in
 control of CA certificates. For some applications, this may be sufficient to
 mitigate the attack. However, other applications may still be impacted. For
-example:<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+example:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.5-2.1">
-            <p id="section-6.5-2.1.1">Any application that evaluates an untrusted PKI, such as a hosting provider
-that evaluates a customer-supplied PKI<a href="#section-6.5-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.1-2.1">
+            <p id="section-6.1-2.1.1">Any application that evaluates an untrusted PKI, such as a hosting provider
+that evaluates a customer-supplied PKI<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.5-2.2">
-            <p id="section-6.5-2.2.1">Any application that evaluates an otherwise trusted PKI, but where untrusted
+          <li class="normal" id="section-6.1-2.2">
+            <p id="section-6.1-2.2.1">Any application that evaluates an otherwise trusted PKI, but where untrusted
 entities have technically-constrained intermediate certificates where policy
-mapping and path length are unconstrained.<a href="#section-6.5-2.2.1" class="pilcrow">¶</a></p>
+mapping and path length are unconstrained.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
+</section>
+</div>
+<div id="limit-certificate-depth">
+<section id="section-6.2">
+        <h3 id="name-limit-certificate-depth">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-limit-certificate-depth" class="section-name selfRef">Limit Certificate Depth</a>
+        </h3>
+<p id="section-6.2-1">The policy tree grows exponentially in the depth of a certification path, so
+limiting the depth and certificate size can mitigate the attack.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">However, this option may not be viable for all applications. Too low of a limit
+may reject existing paths which the application wishes to accept. Too high of a
+limit may still admit a DoS attack for the application. By modifying the example
+in <a href="#exponential-growth" class="auto internal xref">Section 3.2</a> to increase the number of policies asserted in each
+certificate, an attacker could still achieve O(N^(depth/2)) scaling.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="limit-policy-tree-size">
+<section id="section-6.3">
+        <h3 id="name-limit-policy-tree-size">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-limit-policy-tree-size" class="section-name selfRef">Limit Policy Tree Size</a>
+        </h3>
+<p id="section-6.3-1">The attack can be mitigated by limiting the number of nodes in the policy tree,
+and rejecting the certification path if this limit is reached. This limit should
+be set high enough to still admit existing valid certification paths for the
+application, but low enough to no longer admit a DoS attack.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="inhibit-policy-mapping">
+<section id="section-6.4">
+        <h3 id="name-inhibit-policy-mapping">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-inhibit-policy-mapping" class="section-name selfRef">Inhibit Policy Mapping</a>
+        </h3>
+<p id="section-6.4-1">If policy mapping is disabled via the initial-policy-mapping-inhibit setting
+(see <span><a href="https://rfc-editor.org/rfc/rfc5280#section-6.1.1" class="relref">Section 6.1.1</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), the attack is mitigated. This also
+significantly simplifies the X.509 implementation, which reduces the risk of
+other security bugs. However, this will break compatibility with any existing
+certification paths which rely on policy mapping.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<p id="section-6.4-2">To facilitate this mitigation, certificate authorities SHOULD NOT issue
+certificates with the policy mappings extension (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.5" class="relref">Section 4.2.1.5</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>). Applications maintaining policies for accepted trust anchors are
+RECOMMENDED to forbid this extension in participating certificate authorities.<a href="#section-6.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="disable-policy-checking">
+<section id="section-6.5">
+        <h3 id="name-disable-policy-checking">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-disable-policy-checking" class="section-name selfRef">Disable Policy Checking</a>
+        </h3>
+<p id="section-6.5-1">An X.509 validator can mitigate this attack by disabling policy validation
+entirely. This may be viable for applications which do not require policy
+validation. In this case, critical policy-related extensions, notably the policy
+constraints (<span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.11" class="relref">Section 4.2.1.11</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), MUST be treated as unrecognized
+extensions as in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2" class="relref">Section 4.2</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> and be rejected.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

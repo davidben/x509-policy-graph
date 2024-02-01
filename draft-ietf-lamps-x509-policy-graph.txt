@@ -4,9 +4,9 @@
 
 Limited Additional Mechanisms for PKIX and SMIME             D. Benjamin
 Internet-Draft                                                Google LLC
-Updates: 5280 (if approved)                              17 January 2024
+Updates: 5280 (if approved)                              1 February 2024
 Intended status: Standards Track                                        
-Expires: 20 July 2024
+Expires: 4 August 2024
 
 
                    Updates to X.509 Policy Validation
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 July 2024.
+   This Internet-Draft will expire on 4 August 2024.
 
 Copyright Notice
 
@@ -83,11 +83,11 @@ Table of Contents
      5.5.  Updates to Section 6.1.5
      5.6.  Updates to Section 6.1.6
    6.  Other Mitigations
-     6.1.  Limit Certificate Depth
-     6.2.  Limit Policy Tree Size
-     6.3.  Inhibit Policy Mapping
-     6.4.  Disable Policy Checking
-     6.5.  Verify Signatures First
+     6.1.  Verify Signatures First
+     6.2.  Limit Certificate Depth
+     6.3.  Limit Policy Tree Size
+     6.4.  Inhibit Policy Mapping
+     6.5.  Disable Policy Checking
    7.  Implementation Status
    8.  Security Considerations
    9.  IANA Considerations
@@ -588,19 +588,18 @@ Table of Contents
              For example, consider a valid_policy_graph with a node of
              depth i-1 where the expected_policy_set is {Gold, Silver},
              and a second node of depth i-1 where the
-             expected_policy_set is {Gold, Bronze}. Assume anyPolicy
-             appears in the certificate policies extension of
-             certificate i with policy qualifiers AP-Q, but Gold and
-             Silver do not appear.  This rule will generate two child
-             nodes of depth i, one for each policy.  The result is shown
-             below as Figure 7.
+             expected_policy_set is {Gold}. Assume anyPolicy appears in
+             the certificate policies extension of certificate i with
+             policy qualifiers AP-Q, but Gold and Silver do not appear.
+             This rule will generate two child nodes of depth i, one for
+             each policy.  The result is shown below as Figure 7.
 
                  +-----------------+   +-----------------+
                  |       Red       |   |       Blue      |
                  +-----------------+   +-----------------+
                  |       {}        |   |       {}        |   depth i-1
                  +-----------------+   +-----------------+
-                 |  {Gold, Silver} |   |  {Gold, Bronze} |
+                 |  {Gold, Silver} |   |      {Gold}     |
                  +-----------------+   +-----------------+
                          |         \            |
                          |          \           |
@@ -760,9 +759,9 @@ Table of Contents
 
    NEW:
 
-      If either (1) the value of explicit_policy variable is greater
-      than zero or (2) the user_constrained_policy_set is not empty,
-      then path processing has succeeded.
+      If either (1) the value of explicit_policy is greater than zero or
+      (2) the user_constrained_policy_set is not empty, then path
+      processing has succeeded.
 
 5.6.  Updates to Section 6.1.6
 
@@ -799,52 +798,7 @@ Table of Contents
    This section describes alternate mitigation and partial mitigation
    strategies.
 
-6.1.  Limit Certificate Depth
-
-   The policy tree grows exponentially in the depth of a certification
-   path, so limiting the depth and certificate size can mitigate the
-   attack.
-
-   However, this option may not be viable for all applications.  Too low
-   of a limit may reject existing paths which the application wishes to
-   accept.  Too high of a limit may still admit a DoS attack for the
-   application.  By modifying the example in Section 3.2 to increase the
-   number of policies asserted in each ertificate, an attacker could
-   still achieve O(N^(depth/2)) scaling.
-
-6.2.  Limit Policy Tree Size
-
-   The attack can be mitigated by limiting the number of nodes in the
-   policy tree, and rejecting the certification path if this limit is
-   reached.  This limit should be set high enough to still admit
-   existing valid certification paths for the application, but low
-   enough to no longer admit a DoS attack.
-
-6.3.  Inhibit Policy Mapping
-
-   If policy mapping is disabled via the initial-policy-mapping-inhibit
-   setting (see Section 6.1.1 of [RFC5280]), the attack is mitigated.
-   This also significantly simplifies the X.509 implementation, which
-   reduces the risk of other security bugs.  However, this will break
-   compatibility with any existing certification paths which rely on
-   policy mapping.
-
-   To facilitate this mitigation, certificate authorities SHOULD NOT
-   issue certificates with the policy mappings extension
-   (Section 4.2.1.5 of [RFC5280]).  Applications maintaining policies
-   for accepted trust anchors are RECOMMENDED to forbid this extension
-   in participating certificate authorities.
-
-6.4.  Disable Policy Checking
-
-   An X.509 validator can mitigate this attack by disabling policy
-   validation entirely.  This may be viable for applications which do
-   not require policy validation.  In this case, critical policy-related
-   extensions, notably the policy constraints (Section 4.2.1.11 of
-   [RFC5280]), MUST be treated as unrecognized extensions as in
-   Section 4.2 of [RFC5280] and be rejected.
-
-6.5.  Verify Signatures First
+6.1.  Verify Signatures First
 
    X.509 validators SHOULD verify signatures in certification paths
    before or in conjunction with policy verification.  This limits the
@@ -859,6 +813,51 @@ Table of Contents
       untrusted entities have technically-constrained intermediate
       certificates where policy mapping and path length are
       unconstrained.
+
+6.2.  Limit Certificate Depth
+
+   The policy tree grows exponentially in the depth of a certification
+   path, so limiting the depth and certificate size can mitigate the
+   attack.
+
+   However, this option may not be viable for all applications.  Too low
+   of a limit may reject existing paths which the application wishes to
+   accept.  Too high of a limit may still admit a DoS attack for the
+   application.  By modifying the example in Section 3.2 to increase the
+   number of policies asserted in each certificate, an attacker could
+   still achieve O(N^(depth/2)) scaling.
+
+6.3.  Limit Policy Tree Size
+
+   The attack can be mitigated by limiting the number of nodes in the
+   policy tree, and rejecting the certification path if this limit is
+   reached.  This limit should be set high enough to still admit
+   existing valid certification paths for the application, but low
+   enough to no longer admit a DoS attack.
+
+6.4.  Inhibit Policy Mapping
+
+   If policy mapping is disabled via the initial-policy-mapping-inhibit
+   setting (see Section 6.1.1 of [RFC5280]), the attack is mitigated.
+   This also significantly simplifies the X.509 implementation, which
+   reduces the risk of other security bugs.  However, this will break
+   compatibility with any existing certification paths which rely on
+   policy mapping.
+
+   To facilitate this mitigation, certificate authorities SHOULD NOT
+   issue certificates with the policy mappings extension
+   (Section 4.2.1.5 of [RFC5280]).  Applications maintaining policies
+   for accepted trust anchors are RECOMMENDED to forbid this extension
+   in participating certificate authorities.
+
+6.5.  Disable Policy Checking
+
+   An X.509 validator can mitigate this attack by disabling policy
+   validation entirely.  This may be viable for applications which do
+   not require policy validation.  In this case, critical policy-related
+   extensions, notably the policy constraints (Section 4.2.1.11 of
+   [RFC5280]), MUST be treated as unrecognized extensions as in
+   Section 4.2 of [RFC5280] and be rejected.
 
 7.  Implementation Status
 
