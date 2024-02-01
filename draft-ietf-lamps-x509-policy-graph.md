@@ -701,6 +701,21 @@ X.509 implementations that are unable switch to the policy graph structure
 SHOULD mitigate the denial-of-service attack in other ways. This section
 describes alternate mitigation and partial mitigation strategies.
 
+## Verify Signatures First
+
+X.509 validators SHOULD verify signatures in certification paths before or in
+conjunction with policy verification. This limits the attack to entities in
+control of CA certificates. For some applications, this may be sufficient to
+mitigate the attack. However, other applications may still be impacted. For
+example:
+
+* Any application that evaluates an untrusted PKI, such as a hosting provider
+  that evaluates a customer-supplied PKI
+
+* Any application that evaluates an otherwise trusted PKI, but where untrusted
+  entities have technically-constrained intermediate certificates where policy
+  mapping and path length are unconstrained.
+
 ## Limit Certificate Depth
 
 The policy tree grows exponentially in the depth of a certification path, so
@@ -739,21 +754,6 @@ entirely. This may be viable for applications which do not require policy
 validation. In this case, critical policy-related extensions, notably the policy
 constraints ({{Section 4.2.1.11 of RFC5280}}), MUST be treated as unrecognized
 extensions as in {{Section 4.2 of RFC5280}} and be rejected.
-
-## Verify Signatures First
-
-X.509 validators SHOULD verify signatures in certification paths before or in
-conjunction with policy verification. This limits the attack to entities in
-control of CA certificates. For some applications, this may be sufficient to
-mitigate the attack. However, other applications may still be impacted. For
-example:
-
-* Any application that evaluates an untrusted PKI, such as a hosting provider
-  that evaluates a customer-supplied PKI
-
-* Any application that evaluates an otherwise trusted PKI, but where untrusted
-  entities have technically-constrained intermediate certificates where policy
-  mapping and path length are unconstrained.
 
 # Implementation Status
 {:removeinrfc="true"}
