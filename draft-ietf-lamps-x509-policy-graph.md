@@ -806,5 +806,5 @@ This document has no IANA actions.
 
 The author thanks Bob Beck, Adam Langley, Matt Mueller, and Ryan Sleevi for
 many valuable discussions that led to discovering this issue, understanding it,
-and developing the mitigation. The author also thanks Martin Thomson and Job
-Snijders for feedback on this document.
+and developing the mitigation. The author also thanks Martin Thomson, Job
+Snijders, and John Scudder for their review and feedback on this document.
