@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-02-01T01:12:42.564617+00:00",
+  "timestamp": "2024-02-04T01:13:35.901822+00:00",
   "repo": "davidben/x509-policy-graph",
   "labels": [
     {
@@ -364,6 +364,63 @@
               "updatedAt": "2024-01-17T22:44:22Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOJ4e6bs5lzcuZ",
+      "title": "jgs found a bug! :-)",
+      "url": "https://github.com/davidben/x509-policy-graph/pull/7",
+      "state": "MERGED",
+      "author": "job",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-02-02T08:46:44Z",
+      "updatedAt": "2024-02-02T17:25:11Z",
+      "baseRepository": "davidben/x509-policy-graph",
+      "baseRefName": "main",
+      "baseRefOid": "95417741d1e74e8fcef8a0cbc5bfe6d3841e21b3",
+      "headRepository": "job/x509-policy-graph",
+      "headRefName": "main",
+      "headRefOid": "3b7f710cb6605c31bd99d6c7e8120dc3b26ba37b",
+      "closedAt": "2024-02-02T17:22:44Z",
+      "mergedAt": "2024-02-02T17:22:44Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "5c8c13fe7c233bdd03e9931c1983936bed47460a"
+      },
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "body": "Ah yeah. Procedurally, how to handle this? I already got an email that it was sent to the RFC editor. I can probably just try to remember to ask them to add it when they ask for last comments.",
+          "createdAt": "2024-02-02T17:22:13Z",
+          "updatedAt": "2024-02-02T17:22:13Z"
+        },
+        {
+          "author": "job",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Just email the RFC editor to add the name to the acknowledgments and point to this diff and jsg\u2019s mail in last-call. Sprinkling praise never hurts and they know it. CC the responsible AD on this ",
+          "createdAt": "2024-02-02T17:25:09Z",
+          "updatedAt": "2024-02-02T17:25:09Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJ4e6bs5u26k8",
+          "commit": {
+            "abbreviatedOid": "3b7f710"
+          },
+          "author": "davidben",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-02-02T17:22:39Z",
+          "updatedAt": "2024-02-02T17:22:39Z",
+          "comments": []
         }
       ]
     }
